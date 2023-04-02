@@ -17,7 +17,7 @@ public class CategorieValidator {
         }
 
         if (dto.getDescription() == null || dto.getDescription().isEmpty()) {
-            errors.add("Le desciption du produit ne peut pas être vide");
+            errors.add("La desciption du produit ne peut pas être vide");
         }
 
         return errors;

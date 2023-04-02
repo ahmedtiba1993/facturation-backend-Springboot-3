@@ -8,4 +8,6 @@ public interface ProduitRepository extends JpaRepository<Produit, Long> {
 
     @Query("SELECT COUNT(p) FROM Produit p WHERE p.categorie.id = :categorieId")
     Long countByCategorieId(Long categorieId);
+
+
 }

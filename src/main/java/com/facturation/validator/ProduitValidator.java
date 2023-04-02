@@ -24,10 +24,10 @@ public class ProduitValidator {
             errors.add("Le code de produit est obligatoire");
         }
 
-        // Validation de la catégorie du produit
+      /*  // Validation de la catégorie du produit
        if (produit.getCategory() == null) {
             errors.add("Le produit doit être associé à une catégorie");
-        }
+        }*/
 
         // Validation du prix unitaire du produit
         if (produit.getPrix() == null || produit.getPrix().compareTo(BigDecimal.ZERO) <= 0) {

@@ -1,22 +1,22 @@
 package com.facturation.service.impl;
 
-import com.facturation.dto.CategorieDto;
 import com.facturation.dto.ProduitDto;
 import com.facturation.exception.EntityNotFoundException;
 import com.facturation.exception.ErrorCodes;
 import com.facturation.exception.InvalidEntityException;
-import com.facturation.model.Categorie;
 import com.facturation.model.Produit;
 import com.facturation.repository.ProduitRepository;
 import com.facturation.service.ProduitService;
 import com.facturation.validator.ProduitValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 @Service
 @Slf4j
@@ -31,13 +31,14 @@ public class ProduitServiceImpl implements ProduitService {
 
     @Override
     public ProduitDto save(ProduitDto dto) {
+        log.info("Produit{} ",dto);
         List<String> errors = ProduitValidator.validate(dto);
 
         if(!errors.isEmpty()) {
             log.error("Produit is not valid {} ",dto);
             throw new InvalidEntityException("Produit n est pas valide", ErrorCodes.PRODUIT_NOT_VALID,errors);
         }
-        log.error("");
+        log.info("Produit{} ",dto);
         return ProduitDto.fromEntity(produitRepository.save(ProduitDto.toEntity(dto)));
     }
 
@@ -59,10 +60,12 @@ public class ProduitServiceImpl implements ProduitService {
     }
 
     @Override
-    public List<ProduitDto> findAll() {
-        return produitRepository.findAll().stream()
-                .map(ProduitDto::fromEntity)
-                .collect(Collectors.toList());    }
+    public Page<ProduitDto> findAll(Pageable pageable) {
+        Page<Produit> produits = produitRepository.findAll(pageable);
+        Function<Produit, ProduitDto> converter = ProduitDto::fromEntity;
+        Page<ProduitDto> produitDtosPage = produits.map(converter);
+        return produitDtosPage;
+    }
 
     @Override
     public void delete(Long id) {
