@@ -41,6 +41,7 @@ public class CategorieServiceImpl implements CategorieService {
         List<String> errors = CategorieValidator.validate(dto);
 
         if (!errors.isEmpty()) {
+            log.error("Categorie is not valid {} ",dto);
             throw new InvalidEntityException("Catégorie n est pas valide", ErrorCodes.CATEGORIE_NOT_VALID, errors);
         }
 
@@ -49,6 +50,7 @@ public class CategorieServiceImpl implements CategorieService {
             throw new InvalidEntityException("La catégorie " + dto.getNom() + " existe déjà.", ErrorCodes.CATEGORIE_NOT_VALID, errors);
         }
 
+        log.info("Add Category{} ",dto);
         return CategorieDto.fromEntity(categorieRepository.save(CategorieDto.toEntity(dto)));
     }
 
