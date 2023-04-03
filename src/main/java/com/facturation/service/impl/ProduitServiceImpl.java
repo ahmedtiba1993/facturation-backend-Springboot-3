@@ -31,7 +31,6 @@ public class ProduitServiceImpl implements ProduitService {
 
     @Override
     public ProduitDto save(ProduitDto dto) {
-        log.info("Produit{} ",dto);
         List<String> errors = ProduitValidator.validate(dto);
 
         if(!errors.isEmpty()) {

@@ -8,7 +8,9 @@ public enum ErrorCodes {
     PRODUIT_NOT_FOUND(10),
     PRODUIT_NOT_VALID(11),
     CATEGORIE_NOT_FOUND(20),
-    CATEGORIE_NOT_VALID(21);
+    CATEGORIE_NOT_VALID(21),
+    CLINET_NOT_VALID(30),
+    CLIENT_NOT_FOUND(31);
 
     private int code;
 
