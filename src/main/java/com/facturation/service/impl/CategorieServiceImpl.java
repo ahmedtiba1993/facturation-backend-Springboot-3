@@ -72,7 +72,7 @@ public class CategorieServiceImpl implements CategorieService {
     }
 
     @Override
-    public Page<CategorieDto> findAll(Pageable pageable) {
+    public Page<CategorieDto> findAllPaginated(Pageable pageable) {
         Page<Categorie> categories = categorieRepository.findAll(pageable);
         Function<Categorie, CategorieDto> converter = CategorieDto::fromEntity;
         Page<CategorieDto> categorieDtosPage = categories.map(converter);
@@ -88,5 +88,12 @@ public class CategorieServiceImpl implements CategorieService {
             throw new OperationNotAllowedException("La catégorie contient des produits, elle ne peut pas être supprimée");
         }
         categorieRepository.deleteById(id);
+    }
+
+    @Override
+    public List<CategorieDto> findAll() {
+        return categorieRepository.findAll().stream()
+                .map(CategorieDto::fromEntity)
+                .collect(Collectors.toList());
     }
 }

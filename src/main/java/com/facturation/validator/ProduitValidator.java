@@ -30,7 +30,7 @@ public class ProduitValidator {
         }*/
 
         // Validation du prix unitaire du produit
-        if (produit.getPrix() == null || produit.getPrix().compareTo(BigDecimal.ZERO) <= 0) {
+        if (produit.getPrix() == null || produit.getPrix() <= 0) {
             errors.add("Le prix unitaire du produit doit être supérieur à 0");
         }
 

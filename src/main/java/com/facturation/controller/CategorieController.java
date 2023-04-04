@@ -32,13 +32,18 @@ public class CategorieController implements CategorieApi {
     }
 
     @Override
-    public Page<CategorieDto> findAll(int page, int size) {
+    public Page<CategorieDto> findAllPaginated(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return categorieService.findAll(pageable);
+        return categorieService.findAllPaginated(pageable);
     }
 
     @Override
     public void delete(Long id) {
         categorieService.delete(id);
+    }
+
+    @Override
+    public List<CategorieDto> findAll() {
+        return categorieService.findAll();
     }
 }

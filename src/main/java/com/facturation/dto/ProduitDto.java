@@ -18,7 +18,7 @@ public class ProduitDto {
 
     private String code;
 
-    private BigDecimal prix;
+    private Double prix;
 
     private int stock;
 

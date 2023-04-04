@@ -12,7 +12,9 @@ public interface CategorieService {
 
     CategorieDto findById(Long id);
 
-    Page<CategorieDto> findAll(Pageable pageable);
+    Page<CategorieDto> findAllPaginated(Pageable pageable);
 
     void delete (Long id);
+    List<CategorieDto> findAll();
+
 }
