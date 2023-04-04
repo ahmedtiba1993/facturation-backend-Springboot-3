@@ -10,7 +10,7 @@ public enum ErrorCodes {
     CATEGORIE_NOT_FOUND(20),
     CATEGORIE_NOT_VALID(21),
     CLINET_NOT_VALID(30),
-    CLIENT_NOT_FOUND(31);
+    CLIENT_NOT_FOUND(31), FACTURE_NOT_VALID(40);
 
     private int code;
 

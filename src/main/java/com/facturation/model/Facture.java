@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,17 +19,19 @@ public class Facture {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @CreatedDate
     private LocalDate dateFacture;
 
-    private Double montantTotal;
+    private int tauxTVA;
+
+    private Double montantTTC;
+
+    private Double montantHt;
 
     @ManyToOne
     private Client client;
 
-    @OneToMany(mappedBy = "facture", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "facture")
     private List<LigneFacture> lignesFacture;
 
-    @ManyToOne
-    @JoinColumn(name = "categorie_id")
-    private Categorie categorie;
 }

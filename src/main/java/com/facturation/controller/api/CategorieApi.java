@@ -18,10 +18,13 @@ public interface CategorieApi {
     @GetMapping(value =CATEGORRIE_ENDPOINT+ "/id/{idCat}" , produces = MediaType.APPLICATION_JSON_VALUE)
     CategorieDto findById(@PathVariable("idCat") Long id);
 
-    @GetMapping(value =CATEGORRIE_ENDPOINT+ "/all" , produces = MediaType.APPLICATION_JSON_VALUE)
-    Page<CategorieDto> findAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size);
+    @GetMapping(value =CATEGORRIE_ENDPOINT+ "/allpaginated" , produces = MediaType.APPLICATION_JSON_VALUE)
+    Page<CategorieDto> findAllPaginated(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size);
 
     @DeleteMapping(value =CATEGORRIE_ENDPOINT+ "/delete/{idCat}" , produces = MediaType.APPLICATION_JSON_VALUE)
     void delete (@PathVariable("idCat") Long id);
+
+    @GetMapping(value =CATEGORRIE_ENDPOINT+ "/all" , produces = MediaType.APPLICATION_JSON_VALUE)
+    List<CategorieDto> findAll();
 
 }
