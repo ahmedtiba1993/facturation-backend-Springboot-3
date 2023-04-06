@@ -2,6 +2,7 @@ package com.facturation.service.impl;
 
 import com.facturation.dto.FactureDto;
 import com.facturation.dto.LigneFactureDto;
+import com.facturation.dto.ProduitDto;
 import com.facturation.exception.EntityNotFoundException;
 import com.facturation.exception.ErrorCodes;
 import com.facturation.exception.InvalidEntityException;
@@ -14,14 +15,19 @@ import com.facturation.repository.FactureRepository;
 import com.facturation.repository.LigneFactureRepository;
 import com.facturation.repository.ProduitRepository;
 import com.facturation.service.FactureService;
+import com.facturation.service.TimbreFiscalService;
 import com.facturation.validator.FactureValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 @Slf4j
@@ -31,13 +37,15 @@ public class FactureServiceImpl implements FactureService {
     private ClientRepository clientRepository;
     private ProduitRepository produitRepository;
     private LigneFactureRepository ligneFactureRepository;
+    private TimbreFiscalService timbreFiscalService;
 
     @Autowired
-    public FactureServiceImpl(FactureRepository factureRepository,ClientRepository clientRepository,ProduitRepository produitRepository,LigneFactureRepository ligneFactureRepository) {
+    public FactureServiceImpl(FactureRepository factureRepository, ClientRepository clientRepository, ProduitRepository produitRepository, LigneFactureRepository ligneFactureRepository, TimbreFiscalService timbreFiscalService) {
         this.factureRepository = factureRepository;
         this.clientRepository = clientRepository;
         this.produitRepository = produitRepository;
         this.ligneFactureRepository = ligneFactureRepository;
+        this.timbreFiscalService = timbreFiscalService;
     }
 
     @Override
@@ -61,7 +69,7 @@ public class FactureServiceImpl implements FactureService {
                 if(ligneFactureDto.getProduit() != null){
                     Optional<Produit> produit = produitRepository.findById(ligneFactureDto.getProduit().getId());
                     if(produit.isEmpty()) {
-                        log.error("prodtui not fond dans facture ",ligneFactureDto.getProduit().getId());
+                        log.error("Produit not fond dans facture ",ligneFactureDto.getProduit().getId());
                         produitErrors.add("prodtui introvable '");
                     }
                 }
@@ -73,22 +81,46 @@ public class FactureServiceImpl implements FactureService {
             throw new InvalidEntityException("prodiot n'existe pas dans la BDD",ErrorCodes.PRODUIT_NOT_FOUND,produitErrors);
         }
 
-        int tauxTva = 7;
+        int tauxTva = 19;
         dto.setTauxTVA(tauxTva);
+        dto.setReference(generateReference(dto.getClient().getCode()));
+        dto.setTimbreFiscale(timbreFiscalService.getTimbreFiscale().getMontant());
         Facture saveFacture = factureRepository.save(FactureDto.toEntity(dto));
 
         double montantTotalProduit = 0.0;
+        int remise = dto.getClient().getRemise();
         if(dto.getLignesFacture() != null) {
             for (LigneFactureDto ligneFact : dto.getLignesFacture()) {
-                montantTotalProduit = montantTotalProduit + (ligneFact.getProduit().getPrix() * ligneFact.getQuantite());
+                double montantProduit = ligneFact.getProduit().getPrix() * ligneFact.getQuantite();
+                montantTotalProduit = montantTotalProduit + (montantProduit - (montantProduit * (remise / 100.0)));
                 LigneFacture ligneFacture=LigneFactureDto.toEntity(ligneFact);
                 ligneFacture.setFacture(saveFacture);
                 ligneFacture.setPrixUnitaire(ligneFact.getProduit().getPrix());
+                ligneFacture.setRemise(remise);
+                ligneFacture.setPrixTotal((montantProduit - (montantProduit * (remise / 100.0))));
                 ligneFactureRepository.save(ligneFacture);
             }
         }
-        double montantTotal = montantTotalProduit + ((montantTotalProduit * tauxTva ) / 100);
+        double montantTotal = montantTotalProduit + (montantTotalProduit * (tauxTva / 100.0));
         factureRepository.updateMontantTotal(saveFacture.getId(), montantTotalProduit,montantTotal);
         return FactureDto.fromEntity(saveFacture);
+    }
+    @Override
+    public String generateReference(String codeClient){
+        LocalDate today = LocalDate.now();
+        int year = today.getYear();
+
+        int numeroFactureParClient = factureRepository.countByClient_Code(codeClient)+1;
+        String nombreDeFacturesFormatte = String.format("%03d", numeroFactureParClient);
+
+        return year + "-" + codeClient + "-" +nombreDeFacturesFormatte;
+    }
+
+    @Override
+    public Page<FactureDto> findAll(Pageable pageable) {
+        Page<Facture> factures = factureRepository.findAll(pageable);
+        Function<Facture, FactureDto> converter = FactureDto::fromEntity;
+        Page<FactureDto> factureDtosPage = factures.map(converter);
+        return factureDtosPage;
     }
 }

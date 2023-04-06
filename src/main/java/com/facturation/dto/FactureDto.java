@@ -22,6 +22,10 @@ public class FactureDto {
 
     private ClientDto client;
 
+    private String reference;
+
+    private double timbreFiscale;
+
     private List<LigneFactureDto> lignesFacture;
 
     public static FactureDto fromEntity (Facture facture) {
@@ -35,7 +39,9 @@ public class FactureDto {
                 .montantHt(facture.getMontantHt())
                 .montantTTC(facture.getMontantTTC())
                 .tauxTVA(facture.getTauxTVA())
+                .reference(facture.getReference())
                 .client(ClientDto.fromEntity(facture.getClient()))
+                .timbreFiscale(facture.getTimbreFiscale())
                 .lignesFacture(
                         facture.getLignesFacture() !=null ?
                                 facture.getLignesFacture().stream()
@@ -56,7 +62,9 @@ public class FactureDto {
         facture.setMontantTTC(dto.getMontantTTC());
         facture.setMontantHt(dto.getMontantHt());
         facture.setTauxTVA(dto.getTauxTVA());
+        facture.setReference(dto.getReference());
         facture.setClient(ClientDto.toEntity(dto.getClient()));
+        facture.setTimbreFiscale(dto.getTimbreFiscale());
         return facture;
 
     }

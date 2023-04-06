@@ -26,6 +26,10 @@ public class Client implements Serializable {
 
     private int tel;
 
+    private String code;
+
+    private int remise;
+
     @OneToMany(mappedBy = "client",fetch = FetchType.LAZY)
     private List<Facture> factures;
 
