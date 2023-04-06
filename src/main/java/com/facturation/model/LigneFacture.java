@@ -24,4 +24,8 @@ public class LigneFacture {
     private int quantite;
 
     private Double prixUnitaire;
+
+    private int remise;
+
+    private double prixTotal;
 }

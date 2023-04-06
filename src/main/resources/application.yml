@@ -6,11 +6,12 @@ spring:
     driverClassName: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/facturation
     username: root
-    password:
+    password: admin
   jpa:
+
   
     hibernate:
       ddl-auto: update
       dialect: org.hibernate.dialect.mysql5dialect
     generate-ddl: true
-    show-sql: false
+    show-sql: true

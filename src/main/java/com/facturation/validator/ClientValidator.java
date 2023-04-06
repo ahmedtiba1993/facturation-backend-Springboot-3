@@ -14,17 +14,17 @@ public class ClientValidator {
             errors.add("Le client ne peut pas être null");
         } else {
             // Vérification de la longueur du nom
-            if (clientDto.getNom().isEmpty() || clientDto.getNom().length() > 50) {
+            if (clientDto.getNom() == null || clientDto.getNom().length() > 50) {
                 errors.add("Le nom doit avoir moins de 50 caractères");
             }
 
             // Vérification de la longueur du prénom
-            if (clientDto.getPrenom().isEmpty() || clientDto.getPrenom().length() > 50) {
+            if (clientDto.getPrenom() == null || clientDto.getPrenom().length() > 50) {
                 errors.add("Le prénom doit avoir moins de 50 caractères");
             }
 
             // Vérification de l'adresse
-            if (clientDto.getAdresse().isEmpty() || clientDto.getAdresse().length() > 255) {
+            if (clientDto.getAdresse() == null || clientDto.getAdresse().length() > 255) {
                 errors.add("L'adresse doit avoir moins de 255 caractères");
             }
 

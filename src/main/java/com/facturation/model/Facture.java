@@ -28,6 +28,10 @@ public class Facture {
 
     private Double montantHt;
 
+    private String reference;
+
+    private double timbreFiscale;
+
     @ManyToOne
     private Client client;
 

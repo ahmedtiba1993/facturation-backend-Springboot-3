@@ -18,7 +18,11 @@ public class LigneFactureDto {
 
     private int quantite;
 
-    private Double prixUnitaire;
+    private double prixUnitaire;
+
+    private int remise;
+
+    private double prixTotal;
 
     public static LigneFactureDto fromEntity(LigneFacture ligneFacture) {
 
@@ -32,6 +36,8 @@ public class LigneFactureDto {
                 .produit(ProduitDto.fromEntity(ligneFacture.getProduit()))
                 .quantite(ligneFacture.getQuantite())
                 .prixUnitaire(ligneFacture.getPrixUnitaire())
+                .remise(ligneFacture.getRemise())
+                .prixTotal(ligneFacture.getPrixTotal())
                 .build();
     }
 
@@ -47,7 +53,8 @@ public class LigneFactureDto {
         ligneFacture.setProduit(ProduitDto.toEntity(dto.getProduit()));
         ligneFacture.setPrixUnitaire(dto.prixUnitaire);
         ligneFacture.setQuantite(dto.quantite);
-
+        ligneFacture.setRemise(dto.getRemise());
+        ligneFacture.setPrixTotal(dto.getPrixTotal());
         return ligneFacture;
     }
 }

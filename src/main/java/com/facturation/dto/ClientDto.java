@@ -18,6 +18,10 @@ public class ClientDto {
 
     private int tel;
 
+    private String code;
+
+    private int remise;
+
     public static ClientDto fromEntity(Client client) {
         if(client == null){
             return null;
@@ -28,6 +32,8 @@ public class ClientDto {
                 .prenom(client.getPrenom())
                 .adresse(client.getAdresse())
                 .tel(client.getTel())
+                .code(client.getCode())
+                .remise(client.getRemise())
                 .build();
     }
 
@@ -41,6 +47,8 @@ public class ClientDto {
         client.setPrenom(dto.getPrenom());
         client.setAdresse(dto.getAdresse());
         client.setTel(dto.getTel());
+        client.setCode(dto.getCode());
+        client.setRemise(dto.getRemise());
         return client;
     }
 }
