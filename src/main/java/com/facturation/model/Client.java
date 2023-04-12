@@ -22,6 +22,8 @@ public class Client implements Serializable {
 
     private String prenom;
 
+    private String nomCommercial;
+
     private String adresse;
 
     private int tel;

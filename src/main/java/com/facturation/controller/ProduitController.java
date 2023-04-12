@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,13 +35,18 @@ public class ProduitController implements ProduitApi {
     }
 
     @Override
-    public Page<ProduitDto> findAll(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return produitService.findAll(pageable);
+    public Page<ProduitDto> findAllPaginated(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        return produitService.findAllPaginated(pageable);
     }
 
     @Override
     public void delete(Long id) {
         produitService.delete(id);
+    }
+
+    @Override
+    public List<ProduitDto> findAll() {
+        return produitService.findAll();
     }
 }

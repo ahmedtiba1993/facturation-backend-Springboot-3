@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,7 +20,6 @@ public class Facture {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @CreatedDate
     private LocalDate dateFacture;
 
     private int tauxTVA;
@@ -35,7 +35,7 @@ public class Facture {
     @ManyToOne
     private Client client;
 
-    @OneToMany(mappedBy = "facture")
+    @OneToMany(mappedBy = "facture",fetch = FetchType.LAZY)
     private List<LigneFacture> lignesFacture;
 
 }

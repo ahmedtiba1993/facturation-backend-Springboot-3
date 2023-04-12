@@ -32,7 +32,7 @@ public class LigneFactureDto {
 
         return LigneFactureDto.builder()
                 .id(ligneFacture.getId())
-                .facture(FactureDto.fromEntity(ligneFacture.getFacture()))
+                //.facture(FactureDto.fromEntity(ligneFacture.getFacture()))
                 .produit(ProduitDto.fromEntity(ligneFacture.getProduit()))
                 .quantite(ligneFacture.getQuantite())
                 .prixUnitaire(ligneFacture.getPrixUnitaire())
@@ -49,7 +49,7 @@ public class LigneFactureDto {
 
         LigneFacture ligneFacture = new LigneFacture();
         ligneFacture.setId(dto.getId());
-        ligneFacture.setFacture(FactureDto.toEntity(dto.getFacture()));
+        //ligneFacture.setFacture(FactureDto.toEntity(dto.getFacture()));
         ligneFacture.setProduit(ProduitDto.toEntity(dto.getProduit()));
         ligneFacture.setPrixUnitaire(dto.prixUnitaire);
         ligneFacture.setQuantite(dto.quantite);

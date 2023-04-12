@@ -13,7 +13,11 @@ public interface ProduitService {
 
     ProduitDto findById(Long id);
 
-    Page<ProduitDto> findAll(Pageable pageable);
+    Page<ProduitDto> findAllPaginated(Pageable pageable);
 
     void delete (Long id);
+
+    List<ProduitDto> findAll();
+
+
 }

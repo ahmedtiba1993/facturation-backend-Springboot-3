@@ -11,6 +11,17 @@ public class FactureValidator {
     public static List<String> validate(FactureDto dto) {
         List<String> errors = new ArrayList<>();
 
+
+        if (dto.getClient().getId() == null) {
+            errors.add("client est obligatoire");
+        }
+        if(dto.getLignesFacture().isEmpty()){
+            errors.add("produit est obligatoire");
+        }
+        if(dto.getDateFacture() == null){
+            errors.add("date est obligatoire");
+        }
         return errors;
+
     }
 }

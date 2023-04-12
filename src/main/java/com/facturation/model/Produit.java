@@ -29,6 +29,8 @@ public class Produit implements Serializable {
 
     private int stock;
 
+    private Boolean etatRemise;
+
     @ManyToOne
     @JoinColumn(name = "categorie_id")
     private Categorie categorie;

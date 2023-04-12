@@ -17,10 +17,12 @@ public interface ProduitApi {
     @GetMapping(value =PRODUIT_ENDPOINT+ "id/{idProdtuit}" , produces = MediaType.APPLICATION_JSON_VALUE)
     ProduitDto findById(@PathVariable("idProdtuit") Long id);
 
-    @GetMapping(value =PRODUIT_ENDPOINT+ "/all" , produces = MediaType.APPLICATION_JSON_VALUE)
-    Page<ProduitDto> findAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size);
+    @GetMapping(value =PRODUIT_ENDPOINT+ "/allpaginated" , produces = MediaType.APPLICATION_JSON_VALUE)
+    Page<ProduitDto> findAllPaginated(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size);
 
     @DeleteMapping(value =PRODUIT_ENDPOINT+ "/delete/{idProdtuit}" , produces = MediaType.APPLICATION_JSON_VALUE)
     void delete (@PathVariable("idProdtuit") Long id);
 
+    @GetMapping(value =PRODUIT_ENDPOINT+ "/all" , produces = MediaType.APPLICATION_JSON_VALUE)
+    List<ProduitDto> findAll();
 }

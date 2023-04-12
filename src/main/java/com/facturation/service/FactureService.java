@@ -13,4 +13,6 @@ public interface FactureService {
 
     Page<FactureDto> findAll(Pageable pageable);
 
+    FactureDto findById(Long id);
+
     }

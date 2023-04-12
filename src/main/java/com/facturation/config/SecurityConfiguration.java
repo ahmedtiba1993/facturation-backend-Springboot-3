@@ -35,6 +35,7 @@ public class SecurityConfiguration {
         .authenticated()
             .and().cors().configurationSource(request-> {
               CorsConfiguration configuration = new CorsConfiguration();
+              //configuration.setAllowedOrigins(Arrays.asList("http://aalarme.s3-website.eu-west-3.amazonaws.com/"));
               configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200/"));
               configuration.setAllowedMethods(Arrays.asList("*"));
               configuration.setAllowedHeaders(List.of("*"));
