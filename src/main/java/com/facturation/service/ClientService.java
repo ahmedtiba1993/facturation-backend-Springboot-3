@@ -8,7 +8,9 @@ import java.util.List;
 
 public interface ClientService {
 
-    Page<ClientDto> getAllClients(Pageable pageable);
+    Page<ClientDto> getAllClientsPaginated(Pageable pageable);
+
+    List<ClientDto> getAllClient();
 
     ClientDto getClientById(Long id);
 

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -37,6 +38,27 @@ public class ProduitServiceImpl implements ProduitService {
             log.error("Produit is not valid {} ",dto);
             throw new InvalidEntityException("Produit n est pas valide", ErrorCodes.PRODUIT_NOT_VALID,errors);
         }
+        //pour modification
+        if(dto.getId() != null){
+            Optional<Produit> produit = produitRepository.findById(dto.getId());
+            if(dto.getCode().equals(produit.get().getCode()) == false ){
+                Optional<Produit> produitByCode = produitRepository.findProduitByCode(dto.getCode());
+                if (produitByCode.isPresent()) {
+                    log.error("Produit is not valid {} ",dto);
+                    errors.add("Code produit existe");
+                    throw new InvalidEntityException("Produit n est pas valide", ErrorCodes.PRODUIT_NOT_VALID,errors);
+                }
+            }
+            return ProduitDto.fromEntity(produitRepository.save(ProduitDto.toEntity(dto)));
+        }
+        //---------------------
+        Optional<Produit> produit = produitRepository.findProduitByCode(dto.getCode());
+        if (produit.isPresent()) {
+            log.error("Produit is not valid {} ",dto);
+            errors.add("Code produit existe");
+            throw new InvalidEntityException("Produit n est pas valide", ErrorCodes.PRODUIT_NOT_VALID,errors);
+        }
+
         log.info("Produit{} ",dto);
         return ProduitDto.fromEntity(produitRepository.save(ProduitDto.toEntity(dto)));
     }
@@ -59,7 +81,7 @@ public class ProduitServiceImpl implements ProduitService {
     }
 
     @Override
-    public Page<ProduitDto> findAll(Pageable pageable) {
+    public Page<ProduitDto> findAllPaginated(Pageable pageable) {
         Page<Produit> produits = produitRepository.findAll(pageable);
         Function<Produit, ProduitDto> converter = ProduitDto::fromEntity;
         Page<ProduitDto> produitDtosPage = produits.map(converter);
@@ -73,5 +95,12 @@ public class ProduitServiceImpl implements ProduitService {
         }
 
         produitRepository.deleteById(id);
+    }
+
+    @Override
+    public List<ProduitDto> findAll() {
+        return produitRepository.findAll().stream()
+                .map(ProduitDto::fromEntity)
+                .collect(Collectors.toList());
     }
 }

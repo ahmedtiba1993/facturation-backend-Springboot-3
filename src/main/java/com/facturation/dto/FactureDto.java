@@ -5,6 +5,8 @@ import com.facturation.model.Facture;
 import com.facturation.model.LigneFacture;
 import lombok.Builder;
 import lombok.Data;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +27,8 @@ public class FactureDto {
     private String reference;
 
     private double timbreFiscale;
+
+    private LocalDate dateFacture;
 
     private List<LigneFactureDto> lignesFacture;
 
@@ -48,6 +52,7 @@ public class FactureDto {
                                         .map(LigneFactureDto::fromEntity)
                                         .collect(Collectors.toList()) :null
                 )
+                .dateFacture(facture.getDateFacture())
                 .build();
     }
 
@@ -65,6 +70,7 @@ public class FactureDto {
         facture.setReference(dto.getReference());
         facture.setClient(ClientDto.toEntity(dto.getClient()));
         facture.setTimbreFiscale(dto.getTimbreFiscale());
+        facture.setDateFacture(dto.getDateFacture());
         return facture;
 
     }

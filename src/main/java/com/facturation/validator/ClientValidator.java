@@ -18,10 +18,10 @@ public class ClientValidator {
                 errors.add("Le nom doit avoir moins de 50 caractères");
             }
 
-            // Vérification de la longueur du prénom
+            /*// Vérification de la longueur du prénom
             if (clientDto.getPrenom() == null || clientDto.getPrenom().length() > 50) {
                 errors.add("Le prénom doit avoir moins de 50 caractères");
-            }
+            }*/
 
             // Vérification de l'adresse
             if (clientDto.getAdresse() == null || clientDto.getAdresse().length() > 255) {
@@ -31,6 +31,9 @@ public class ClientValidator {
             // Vérification du numéro de téléphone
             if (clientDto.getTel() <= 0) {
                 errors.add("Le numéro de téléphone doit être supérieur à 0");
+            }
+            if (clientDto.getRemise() <= 0) {
+                errors.add("remise est obligatoire");
             }
         }
 

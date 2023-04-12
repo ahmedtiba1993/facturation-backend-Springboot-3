@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -92,7 +93,11 @@ public class FactureServiceImpl implements FactureService {
         if(dto.getLignesFacture() != null) {
             for (LigneFactureDto ligneFact : dto.getLignesFacture()) {
                 double montantProduit = ligneFact.getProduit().getPrix() * ligneFact.getQuantite();
-                montantTotalProduit = montantTotalProduit + (montantProduit - (montantProduit * (remise / 100.0)));
+                if(ligneFact.getProduit().getEtatRemise() == true){
+                    montantTotalProduit = montantTotalProduit + (montantProduit - (montantProduit * (remise / 100.0)));
+                }else{
+                    montantTotalProduit = montantTotalProduit + montantProduit;
+                }
                 LigneFacture ligneFacture=LigneFactureDto.toEntity(ligneFact);
                 ligneFacture.setFacture(saveFacture);
                 ligneFacture.setPrixUnitaire(ligneFact.getProduit().getPrix());
@@ -122,5 +127,22 @@ public class FactureServiceImpl implements FactureService {
         Function<Facture, FactureDto> converter = FactureDto::fromEntity;
         Page<FactureDto> factureDtosPage = factures.map(converter);
         return factureDtosPage;
+    }
+
+    @Override
+    public FactureDto findById(Long id) {
+        if ( id == null) {
+            return null;
+        }
+
+        Optional<Facture> facture = factureRepository.findById(id);
+        FactureDto dto = facture.map(FactureDto::fromEntity).orElse(null);
+
+        if (dto == null) {
+            throw new EntityNotFoundException("Aucune facture trouvée dans la base de données",
+                    ErrorCodes.FACTURE_NOT_FOUND);
+        }
+
+        return dto;
     }
 }

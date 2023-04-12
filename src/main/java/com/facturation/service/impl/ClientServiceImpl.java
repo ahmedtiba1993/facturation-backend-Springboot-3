@@ -1,5 +1,6 @@
 package com.facturation.service.impl;
 
+import com.facturation.dto.CategorieDto;
 import com.facturation.dto.ClientDto;
 import com.facturation.exception.EntityNotFoundException;
 import com.facturation.exception.ErrorCodes;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -37,16 +39,30 @@ public class ClientServiceImpl implements ClientService {
             log.error("Client is not valid {} ",dto);
             throw new InvalidEntityException("Client n est pas valide", ErrorCodes.CLINET_NOT_VALID,errors);
         }
+        Optional<Client> client = clientRepository.findClientsByCode(dto.getCode());
+        if(client.isPresent()) {
+            log.error("Client is not valid {} ",dto);
+            errors.add("Code client existe");
+            throw new InvalidEntityException("Client n est pas valide", ErrorCodes.CLINET_NOT_VALID,errors);
+        }
         log.info("Add Client{} ",dto);
-        return ClientDto.fromEntity(clientRepository.save(ClientDto.toEntity(dto)));    }
+        return ClientDto.fromEntity(clientRepository.save(ClientDto.toEntity(dto)));
+    }
 
 
     @Override
-    public Page<ClientDto> getAllClients(Pageable pageable) {
+    public Page<ClientDto> getAllClientsPaginated(Pageable pageable) {
         Page<Client> clients = clientRepository.findAll(pageable);
         Function<Client, ClientDto> converter = ClientDto::fromEntity;
         Page<ClientDto> clientDtosPage = clients.map(converter);
         return clientDtosPage;
+    }
+
+    @Override
+    public List<ClientDto> getAllClient() {
+        return clientRepository.findAll().stream()
+                .map(ClientDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @Override

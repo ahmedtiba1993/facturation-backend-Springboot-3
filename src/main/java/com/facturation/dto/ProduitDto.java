@@ -24,6 +24,7 @@ public class ProduitDto {
 
     private CategorieDto category;
 
+    private Boolean etatRemise;
 
     public static ProduitDto fromEntity(Produit produit) {
 
@@ -38,6 +39,7 @@ public class ProduitDto {
                 .prix(produit.getPrix())
                 .stock(produit.getStock())
                 .category(CategorieDto.fromEntity(produit.getCategorie()))
+                .etatRemise(produit.getEtatRemise())
                 .build();
     }
 
@@ -54,6 +56,7 @@ public class ProduitDto {
             produit.setCode(dto.getCode());
             produit.setPrix(dto.getPrix());
             produit.setStock(dto.getStock());
+            produit.setEtatRemise(dto.getEtatRemise());
             produit.setCategorie(CategorieDto.toEntity(dto.getCategory()));
 
         return produit;
