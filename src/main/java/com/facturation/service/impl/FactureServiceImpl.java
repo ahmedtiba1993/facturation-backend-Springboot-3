@@ -115,8 +115,8 @@ public class FactureServiceImpl implements FactureService {
         LocalDate today = LocalDate.now();
         int year = today.getYear();
 
-        int numeroFactureParClient = factureRepository.countByClient_Code(codeClient)+1;
-        String nombreDeFacturesFormatte = String.format("%03d", numeroFactureParClient);
+        int numeroFactureParClient = factureRepository.countByYers(year)+1;
+        String nombreDeFacturesFormatte = String.format("%04d", numeroFactureParClient);
 
         return year + "-" + codeClient + "-" +nombreDeFacturesFormatte;
     }

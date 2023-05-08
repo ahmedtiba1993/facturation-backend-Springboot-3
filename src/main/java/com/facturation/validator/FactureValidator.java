@@ -21,6 +21,9 @@ public class FactureValidator {
         if(dto.getDateFacture() == null){
             errors.add("date est obligatoire");
         }
+        if(dto.getPaymentStatus() == null){
+            errors.add("le statut de facture est obligatoire");
+        }
         return errors;
 
     }

@@ -32,6 +32,8 @@ public class FactureDto {
 
     private List<LigneFactureDto> lignesFacture;
 
+    private Boolean paymentStatus;
+
     public static FactureDto fromEntity (Facture facture) {
 
         if(facture == null) {
@@ -46,6 +48,7 @@ public class FactureDto {
                 .reference(facture.getReference())
                 .client(ClientDto.fromEntity(facture.getClient()))
                 .timbreFiscale(facture.getTimbreFiscale())
+                .paymentStatus(facture.getPaymentStatus())
                 .lignesFacture(
                         facture.getLignesFacture() !=null ?
                                 facture.getLignesFacture().stream()
@@ -71,6 +74,7 @@ public class FactureDto {
         facture.setClient(ClientDto.toEntity(dto.getClient()));
         facture.setTimbreFiscale(dto.getTimbreFiscale());
         facture.setDateFacture(dto.getDateFacture());
+        facture.setPaymentStatus(dto.getPaymentStatus());
         return facture;
 
     }

@@ -32,6 +32,8 @@ public class Facture {
 
     private double timbreFiscale;
 
+    private Boolean paymentStatus;
+
     @ManyToOne
     private Client client;
 

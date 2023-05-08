@@ -14,4 +14,4 @@ spring:
       ddl-auto: update
       dialect: org.hibernate.dialect.mysql5dialect
     generate-ddl: true
-    show-sql: true
+    show-sql: false

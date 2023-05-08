@@ -23,4 +23,8 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
     @Query("SELECT COUNT(f) FROM Facture f JOIN f.client c WHERE c.code LIKE %:codeClient%")
     int countByClient_Code(@Param("codeClient") String codeClient);
 
+    @Query("SELECT COUNT(f) FROM Facture f WHERE YEAR(f.dateFacture) = :currentYear")
+    int countByYers(@Param("currentYear") int currentYear);
+
+
 }
