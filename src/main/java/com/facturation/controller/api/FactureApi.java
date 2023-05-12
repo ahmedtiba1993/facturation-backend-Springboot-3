@@ -29,4 +29,8 @@ public interface FactureApi {
 
     @GetMapping(value = FACTURE_ENDPOINT +"/generate-pdf"+ "/{idFacture}", produces = MediaType.APPLICATION_PDF_VALUE)
     ResponseEntity<InputStreamResource> generatePdf(@PathVariable("idFacture") Long id) throws DocumentException, IOException;
+
+    @PostMapping(value = FACTURE_ENDPOINT +"/statutupdate/{idFacture}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<Void> updateStatut(@PathVariable("idFacture") Long id);
+
 }

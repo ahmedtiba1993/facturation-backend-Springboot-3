@@ -28,4 +28,13 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
     @Query("SELECT COUNT(f) FROM Facture f WHERE YEAR(f.dateFacture) = :currentYear")
     int countByYers(@Param("currentYear") int currentYear);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE Facture f SET f.paymentStatus = true WHERE f.id = :id")
+    void setStatusTrue(Long id);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Facture f SET f.paymentStatus = false WHERE f.id = :id")
+    void setStatusFalse(Long id);
 }

@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
                 description = "Platforme pour créer et de gérer des factures"
         ),
         servers = {
-                @Server(description = "Server localhost 127.0.0.1",url = "https://localhost:8080"),
+                @Server(description = "Server localhost 127.0.0.1",url = "http://localhost:8080"),
                 @Server(description = "Server AWS EC2",url = "13.38.17.45"),
                 @Server(description = "DNS Server AWS EC2",url = "ec2-13-38-17-45.eu-west-3.compute.amazonaws.com"),
         }

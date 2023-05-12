@@ -22,4 +22,6 @@ public interface FactureService {
 
     ResponseEntity<InputStreamResource> generatePdf(Long id) throws DocumentException, IOException;
 
+    ResponseEntity<Void> updateStatus(Long id);
+
     }

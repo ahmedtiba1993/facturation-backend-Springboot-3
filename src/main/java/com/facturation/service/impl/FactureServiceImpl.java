@@ -21,6 +21,7 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.draw.LineSeparator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -229,11 +230,16 @@ public class FactureServiceImpl implements FactureService {
         celltableHeader2.addElement(p7);
         celltableHeader2.addElement(p8);
         celltableHeader2.setBorder(Rectangle.NO_BORDER);
-        celltableHeader2.setPaddingLeft(120);
+        celltableHeader2.setPaddingLeft(110);
         tableHeader.addCell(celltableHeader2);
 
         tableHeader.setSpacingAfter(10f);
         document.add(tableHeader);
+
+        LineSeparator ls = new LineSeparator();
+        ls.setOffset(0);
+        document.add(new Chunk(ls));
+
 
         // création de la table avec deux colonnes
         PdfPTable table = new PdfPTable(2);
@@ -268,7 +274,7 @@ public class FactureServiceImpl implements FactureService {
         celltable2.addElement(f3);
         celltable2.addElement(f4);
         celltable2.addElement(f5);
-        celltable2.setPaddingLeft(120);
+        celltable2.setPaddingLeft(110);
         table.addCell(celltable2);
 
         table.setSpacingAfter(10f);
@@ -320,9 +326,6 @@ public class FactureServiceImpl implements FactureService {
                     tableFacture.addCell(new PdfPCell(new Phrase(String.valueOf(df.format(l.getPrixUnitaire())+" TND")))).setHorizontalAlignment(Element.ALIGN_CENTER);
                     tableFacture.addCell(new PdfPCell(new Phrase(String.valueOf(l.getRemise())+"%"))).setHorizontalAlignment(Element.ALIGN_CENTER);
                     tableFacture.addCell(new PdfPCell(new Phrase(df.format(l.getPrixTotal())+" TND"))).setHorizontalAlignment(Element.ALIGN_CENTER);
-
-
-
                 }
 
         // Ajout du tableau au document
@@ -337,38 +340,45 @@ public class FactureServiceImpl implements FactureService {
 
         PdfPCell cellTotalBrut = new PdfPCell(new Phrase("Total brut HT"));
         cellTotalBrut.setBorder(Rectangle.NO_BORDER); // supprime les bordures de la cellule
+        cellTotalBrut.setPaddingTop(20);
+        cellTotalBrut.setPaddingBottom(7);
         tablePrix.addCell(cellTotalBrut);
 
-        PdfPCell cellTotalBrutValue = new PdfPCell(new Phrase(String.valueOf(df.format(facutre.get().getMontantHt()))));
+        PdfPCell cellTotalBrutValue = new PdfPCell(new Phrase(String.valueOf(df.format(facutre.get().getMontantHt())+ " TND")));
         cellTotalBrutValue.setBorder(Rectangle.NO_BORDER);
+        cellTotalBrutValue.setPaddingTop(20);
+        cellTotalBrutValue.setPaddingBottom(7);
         tablePrix.addCell(cellTotalBrutValue);
 
         PdfPCell cellTVA = new PdfPCell(new Phrase("TVA 19 %"));
         cellTVA.setBorder(Rectangle.NO_BORDER);
+        cellTVA.setPaddingBottom(7);
         tablePrix.addCell(cellTVA);
 
         PdfPCell cellTVAValue = new PdfPCell(new Phrase(String.valueOf(df.format(facutre.get().getMontantHt()*0.19))+" TND"));
+        cellTVAValue.setPaddingBottom(7);
         cellTVAValue.setBorder(Rectangle.NO_BORDER);
         tablePrix.addCell(cellTVAValue);
 
         PdfPCell cellDroitTimbre = new PdfPCell(new Phrase("Droit de timbre"));
+        cellDroitTimbre.setPaddingBottom(7);
         cellDroitTimbre.setBorder(Rectangle.NO_BORDER);
         tablePrix.addCell(cellDroitTimbre);
 
         PdfPCell cellDroitTimbreValue = new PdfPCell(new Phrase("1.000 TND"));
+        cellDroitTimbreValue.setPaddingBottom(7);
         cellDroitTimbreValue.setBorder(Rectangle.NO_BORDER);
         tablePrix.addCell(cellDroitTimbreValue);
 
-        PdfPCell cellTotalTTC = new PdfPCell(new Phrase("Total TTC"));
+        PdfPCell cellTotalTTC = new PdfPCell(new Phrase("Total TTC" , new Font(Font.FontFamily.HELVETICA, 15,Font.BOLD)));
         cellTotalTTC.setBorder(Rectangle.NO_BORDER);
         tablePrix.addCell(cellTotalTTC);
 
-        PdfPCell cellTotalTTCValue = new PdfPCell(new Phrase(String.valueOf(df.format(facutre.get().getMontantTTC()))+ " TND"));
+        PdfPCell cellTotalTTCValue = new PdfPCell(new Phrase(String.valueOf(df.format(facutre.get().getMontantTTC()))+ " TND", new Font(Font.FontFamily.HELVETICA, 15,Font.BOLD)));
         cellTotalTTCValue.setBorder(Rectangle.NO_BORDER);
         tablePrix.addCell(cellTotalTTCValue);
 
         document.add(tablePrix); // ajoute la table au document
-
         document.close();
 
         ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
@@ -381,6 +391,28 @@ public class FactureServiceImpl implements FactureService {
                 .headers(headers)
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(new InputStreamResource(inputStream));
+    }
+
+    @Override
+    public ResponseEntity<Void> updateStatus(Long id) {
+
+        if ( id == null) {
+            return null;
+        }
+
+        Optional<Facture> facture = factureRepository.findById(id);
+
+        if (!facture.isPresent()) {
+            throw new EntityNotFoundException("Aucune facture trouvée dans la base de données",
+                    ErrorCodes.FACTURE_NOT_FOUND);
+        }
+        if(facture.get().getPaymentStatus() != null && facture.get().getPaymentStatus()){
+            factureRepository.setStatusFalse(id);
+        }else{
+            factureRepository.setStatusTrue(id);
+        }
+
+        return ResponseEntity.ok().build();
     }
 
 }

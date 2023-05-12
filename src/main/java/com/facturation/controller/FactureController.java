@@ -56,4 +56,9 @@ public class FactureController implements FactureApi {
     public ResponseEntity<InputStreamResource> generatePdf(Long id) throws DocumentException, IOException {
       return factureService.generatePdf(id);
     }
+
+    @Override
+    public ResponseEntity<Void> updateStatut(Long id) {
+        return factureService.updateStatus(id);
+    }
 }
