@@ -22,7 +22,4 @@ public class Categorie implements Serializable {
 
     private String description;
 
-    @OneToMany(mappedBy = "categorie",fetch = FetchType.LAZY)
-    private List<Produit> produits;
-
 }

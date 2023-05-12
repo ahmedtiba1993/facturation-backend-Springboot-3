@@ -2,6 +2,8 @@ package com.facturation.repository;
 
 import com.facturation.model.Facture;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -25,6 +27,5 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
 
     @Query("SELECT COUNT(f) FROM Facture f WHERE YEAR(f.dateFacture) = :currentYear")
     int countByYers(@Param("currentYear") int currentYear);
-
 
 }

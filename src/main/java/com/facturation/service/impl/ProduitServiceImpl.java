@@ -103,4 +103,12 @@ public class ProduitServiceImpl implements ProduitService {
                 .map(ProduitDto::fromEntity)
                 .collect(Collectors.toList());
     }
+    @Override
+    public Page<ProduitDto> filtrerProduits(Pageable pageable , String nom, String code, Double prixMin, Double prixMax, Boolean etatRemise) {
+        Page<Produit> produits = produitRepository.findAllProduitByFiltre(pageable , nom, code, prixMin, prixMax,etatRemise);
+        Function<Produit, ProduitDto> converter = ProduitDto::fromEntity;
+        Page<ProduitDto> produitDtosPage = produits.map(converter);
+        return produitDtosPage;
+
+   }
 }

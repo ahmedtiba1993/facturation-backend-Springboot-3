@@ -25,4 +25,12 @@ public interface ProduitApi {
 
     @GetMapping(value =PRODUIT_ENDPOINT+ "/all" , produces = MediaType.APPLICATION_JSON_VALUE)
     List<ProduitDto> findAll();
+
+    @GetMapping(value =PRODUIT_ENDPOINT+"/filtrer", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Page<ProduitDto> filtrerProduits(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size ,
+                                      @RequestParam(required = false) String nom,
+                                      @RequestParam(required = false) String code,
+                                      @RequestParam(required = false) Double prixMin,
+                                      @RequestParam(required = false) Double prixMax,
+                                      @RequestParam(required = false) Boolean etatRemise);
 }

@@ -49,4 +49,10 @@ public class ProduitController implements ProduitApi {
     public List<ProduitDto> findAll() {
         return produitService.findAll();
     }
+
+    @Override
+    public Page<ProduitDto> filtrerProduits(int page, int size , String nom, String code, Double prixMin, Double prixMax , Boolean etatRemise) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        return produitService.filtrerProduits(pageable,nom, code, prixMin, prixMax, etatRemise);
+    }
 }

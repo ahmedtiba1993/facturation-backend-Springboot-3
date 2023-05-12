@@ -20,4 +20,5 @@ public interface ProduitService {
     List<ProduitDto> findAll();
 
 
+    Page<ProduitDto> filtrerProduits(Pageable pageable , String nom, String code, Double prixMin, Double prixMax, Boolean etatRemise);
 }
