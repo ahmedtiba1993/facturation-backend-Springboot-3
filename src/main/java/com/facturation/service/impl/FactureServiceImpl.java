@@ -36,12 +36,16 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+
+import static com.facturation.utils.MontantEnLettres.convertirEnLettres;
 
 @Service
 @Slf4j
@@ -97,7 +101,7 @@ public class FactureServiceImpl implements FactureService {
 
         int tauxTva = 19;
         dto.setTauxTVA(tauxTva);
-        dto.setReference(generateReference(dto.getClient().getCode()));
+        dto.setReference(generateReference(client.get().getCode()));
         dto.setTimbreFiscale(timbreFiscalService.getTimbreFiscale().getMontant());
         Facture saveFacture = factureRepository.save(FactureDto.toEntity(dto));
 
@@ -286,7 +290,7 @@ public class FactureServiceImpl implements FactureService {
         PdfPTable tableFacture = new PdfPTable(columnWidths);
         tableFacture.setWidthPercentage(110);
 
-        PdfPCell cell11 = new PdfPCell(new Phrase("Nom du produit"));
+        PdfPCell cell11 = new PdfPCell(new Phrase("Code produit"));
         cell11.setHorizontalAlignment(Element.ALIGN_CENTER); // définit l'alignement horizontal au centre
         cell11.setBackgroundColor(BaseColor.LIGHT_GRAY); // définit la couleur de fond
         tableFacture.addCell(cell11);
@@ -379,7 +383,20 @@ public class FactureServiceImpl implements FactureService {
         tablePrix.addCell(cellTotalTTCValue);
 
         document.add(tablePrix); // ajoute la table au document
+
+        int partieEntiere = (int) Math.floor(facutre.get().getMontantTTC());
+        double partieDecimale = facutre.get().getMontantTTC() - Math.floor(facutre.get().getMontantTTC());
+        int resultat = (int) (partieDecimale * 1000);
+
+
+        Paragraph pp1 = new Paragraph("Arrêté la présente facture à la somme de ");
+        document.add(pp1);
+        Paragraph pp2 = new Paragraph(convertirEnLettres(partieEntiere) +" dinars et "+convertirEnLettres(resultat)+" millimes");
+        document.add(pp2);
+
         document.close();
+
+
 
         ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 

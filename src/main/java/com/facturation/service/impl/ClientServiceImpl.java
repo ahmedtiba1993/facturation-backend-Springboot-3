@@ -39,11 +39,25 @@ public class ClientServiceImpl implements ClientService {
             log.error("Client is not valid {} ",dto);
             throw new InvalidEntityException("Client n est pas valide", ErrorCodes.CLINET_NOT_VALID,errors);
         }
-        Optional<Client> client = clientRepository.findClientsByCode(dto.getCode());
-        if(client.isPresent()) {
-            log.error("Client is not valid {} ",dto);
-            errors.add("Code client existe");
-            throw new InvalidEntityException("Client n est pas valide", ErrorCodes.CLINET_NOT_VALID,errors);
+
+        //pour modification
+        if(dto.getId() != null){
+            Optional<Client> client = clientRepository.findById(dto.getId());
+            if(dto.getCode().equals(client.get().getCode()) == false){
+                Optional<Client> clientCode = clientRepository.findClientsByCode(dto.getCode());
+                if(clientCode.isPresent()) {
+                    log.error("Client is not valid {} ",dto);
+                    errors.add("Code client existe");
+                    throw new InvalidEntityException("Client n est pas valide", ErrorCodes.CLINET_NOT_VALID,errors);
+                }
+            }
+        }else{
+            Optional<Client> client = clientRepository.findClientsByCode(dto.getCode());
+            if(client.isPresent()) {
+                log.error("Client is not valid {} ",dto);
+                errors.add("Code client existe");
+                throw new InvalidEntityException("Client n est pas valide", ErrorCodes.CLINET_NOT_VALID,errors);
+            }
         }
         log.info("Add Client{} ",dto);
         return ClientDto.fromEntity(clientRepository.save(ClientDto.toEntity(dto)));

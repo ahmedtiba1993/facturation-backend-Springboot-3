@@ -32,7 +32,7 @@ public class ClientValidator {
             if (clientDto.getTel() <= 0) {
                 errors.add("Le numéro de téléphone doit être supérieur à 0");
             }
-            if (clientDto.getRemise() <= 0) {
+            if (clientDto.getRemise() < 0) {
                 errors.add("remise est obligatoire");
             }
         }
