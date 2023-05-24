@@ -10,10 +10,7 @@ import com.facturation.model.Client;
 import com.facturation.model.Facture;
 import com.facturation.model.LigneFacture;
 import com.facturation.model.Produit;
-import com.facturation.repository.ClientRepository;
-import com.facturation.repository.FactureRepository;
-import com.facturation.repository.LigneFactureRepository;
-import com.facturation.repository.ProduitRepository;
+import com.facturation.repository.*;
 import com.facturation.service.FactureService;
 import com.facturation.service.TimbreFiscalService;
 import com.facturation.validator.FactureValidator;
@@ -58,13 +55,16 @@ public class FactureServiceImpl implements FactureService {
     private LigneFactureRepository ligneFactureRepository;
     private TimbreFiscalService timbreFiscalService;
 
+    private NumFactureRepository numFactureRepository;
+
     @Autowired
-    public FactureServiceImpl(FactureRepository factureRepository, ClientRepository clientRepository, ProduitRepository produitRepository, LigneFactureRepository ligneFactureRepository, TimbreFiscalService timbreFiscalService) {
+    public FactureServiceImpl(FactureRepository factureRepository, ClientRepository clientRepository, ProduitRepository produitRepository, LigneFactureRepository ligneFactureRepository, TimbreFiscalService timbreFiscalService,NumFactureRepository numFactureRepository) {
         this.factureRepository = factureRepository;
         this.clientRepository = clientRepository;
         this.produitRepository = produitRepository;
         this.ligneFactureRepository = ligneFactureRepository;
         this.timbreFiscalService = timbreFiscalService;
+        this.numFactureRepository = numFactureRepository;
     }
 
     @Override
@@ -133,10 +133,11 @@ public class FactureServiceImpl implements FactureService {
         LocalDate today = LocalDate.now();
         int year = today.getYear();
 
-        int numeroFactureParClient = factureRepository.countByYers(year)+1;
-        String nombreDeFacturesFormatte = String.format("%04d", numeroFactureParClient);
-
-        return year + "-" +nombreDeFacturesFormatte;
+        DecimalFormat decimalFormat = new DecimalFormat("000");
+        Integer numFacture = numFactureRepository.getNumFacture();
+        String nombreDeFacturesFormatte = decimalFormat.format(numFacture+1);
+        numFactureRepository.updateNumFacture(numFacture+1);
+        return nombreDeFacturesFormatte+"/"+year;
     }
 
     @Override
@@ -189,11 +190,16 @@ public class FactureServiceImpl implements FactureService {
         subTitle.setAlignment(Element.ALIGN_CENTER);
         cellTitle.addElement(subTitle);
 
+        Paragraph sousSubTitle = new Paragraph("Vente et installation de matériel de sécurité électronique", new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL));
+        sousSubTitle.setAlignment(Element.ALIGN_CENTER);
+        cellTitle.addElement(sousSubTitle);
+
         PdfPTable tableTile = new PdfPTable(1);
         tableTile.setWidthPercentage(100);
         cellTitle.setBorder(Rectangle.NO_BORDER);
         tableTile.addCell(cellTitle);
 
+        tableTile.setSpacingAfter(20);
         document.add(tableTile);
 
 
@@ -382,7 +388,7 @@ public class FactureServiceImpl implements FactureService {
         PdfPCell cellTotalTTCValue = new PdfPCell(new Phrase(String.valueOf(df.format(facutre.get().getMontantTTC()))+ " TND", new Font(Font.FontFamily.HELVETICA, 15,Font.BOLD)));
         cellTotalTTCValue.setBorder(Rectangle.NO_BORDER);
         tablePrix.addCell(cellTotalTTCValue);
-
+        tableFacture.setSpacingAfter(30);
         document.add(tablePrix); // ajoute la table au document
 
         int partieEntiere = (int) Math.floor(facutre.get().getMontantTTC());
@@ -390,9 +396,9 @@ public class FactureServiceImpl implements FactureService {
         int resultat = (int) (partieDecimale * 1000);
 
 
-        Paragraph pp1 = new Paragraph("Arrêté la présente facture à la somme de ");
+        Paragraph pp1 = new Paragraph("Arrêté la présente facture à la somme de :");
         document.add(pp1);
-        Paragraph pp2 = new Paragraph(convertirEnLettres(partieEntiere) +" dinars et "+convertirEnLettres(resultat)+" millimes");
+        Paragraph pp2 = new Paragraph(convertirEnLettres(partieEntiere) +" dinars et "+convertirEnLettres(resultat)+" millimes.");
         document.add(pp2);
 
         document.close();
