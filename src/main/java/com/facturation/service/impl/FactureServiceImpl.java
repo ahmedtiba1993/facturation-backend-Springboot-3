@@ -41,6 +41,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -135,12 +136,12 @@ public class FactureServiceImpl implements FactureService {
         int numeroFactureParClient = factureRepository.countByYers(year)+1;
         String nombreDeFacturesFormatte = String.format("%04d", numeroFactureParClient);
 
-        return year + "-" + codeClient + "-" +nombreDeFacturesFormatte;
+        return year + "-" +nombreDeFacturesFormatte;
     }
 
     @Override
-    public Page<FactureDto> findAll(Pageable pageable) {
-        Page<Facture> factures = factureRepository.findAll(pageable);
+    public Page<FactureDto> findAll(Pageable pageable , String refFacture , Double minMontatnTTC , Double maxMontatnTTC , Boolean paymentStatus , Long idClient , LocalDate dateDebut , LocalDate dateFin) {
+        Page<Facture> factures = factureRepository.findAllFiltre(pageable , refFacture , minMontatnTTC , maxMontatnTTC , paymentStatus , idClient , dateDebut , dateFin);
         Function<Facture, FactureDto> converter = FactureDto::fromEntity;
         Page<FactureDto> factureDtosPage = factures.map(converter);
         return factureDtosPage;

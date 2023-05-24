@@ -26,6 +26,8 @@ import org.springframework.http.MediaType;
 
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Date;
 
 @RestController
 public class FactureController implements FactureApi {
@@ -43,9 +45,10 @@ public class FactureController implements FactureApi {
     }
 
     @Override
-    public Page<FactureDto> findAll(int page, int size) {
+    public Page<FactureDto> findAll(int page, int size , String refFacture , Double minMontatnTTC , Double maxMontatnTTC , Boolean paymentStatus , Long idClient , LocalDate dateDebut , LocalDate dateFin) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-        return factureService.findAll(pageable);    }
+        return factureService.findAll(pageable , refFacture , minMontatnTTC , maxMontatnTTC,paymentStatus ,idClient , dateDebut , dateFin);
+    }
 
     @Override
     public FactureDto findById(Long id) {

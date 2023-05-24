@@ -9,6 +9,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 public interface FactureRepository extends JpaRepository<Facture, Long> {
 
     @Transactional
@@ -37,4 +40,13 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
     @Transactional
     @Query("UPDATE Facture f SET f.paymentStatus = false WHERE f.id = :id")
     void setStatusFalse(Long id);
+    @Query("SELECT f FROM Facture f WHERE " +
+            "(f.reference = :refFacture OR :refFacture IS NULL)" +
+            "and (f.montantTTC >= :minMontatnTTC or :minMontatnTTC is null )" +
+            "and (f.montantTTC <= :maxMontatnTTC or :maxMontatnTTC is null )" +
+            "and (f.paymentStatus = :paymentStatus or :paymentStatus is null)" +
+            "and (f.client.id = :idClient or :idClient is null)" +
+            "and (f.dateFacture >= :dateDebut or :dateDebut is null)" +
+            "and (f.dateFacture <= :dateFin or :dateFin is null)")
+    Page<Facture> findAllFiltre(Pageable pageable , String refFacture , Double minMontatnTTC , Double maxMontatnTTC , Boolean paymentStatus , Long idClient , LocalDate dateDebut , LocalDate dateFin);
 }

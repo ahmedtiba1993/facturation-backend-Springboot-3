@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Date;
 
 public interface FactureService {
 
@@ -16,7 +18,7 @@ public interface FactureService {
 
     String generateReference(String codeClient);
 
-    Page<FactureDto> findAll(Pageable pageable);
+    Page<FactureDto> findAll(Pageable pageable , String refFacture , Double minMontatnTTC , Double maxMontatnTTC , Boolean paymentStatus , Long idClient , LocalDate dateDebut , LocalDate dateFin);
 
     FactureDto findById(Long id);
 

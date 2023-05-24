@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Date;
 
 import static com.facturation.utils.Constants.FACTURE_ENDPOINT;
 import static com.facturation.utils.Constants.PRODUIT_ENDPOINT;
@@ -22,7 +24,15 @@ public interface FactureApi {
     FactureDto save(@RequestBody FactureDto dto);
 
     @GetMapping(value = FACTURE_ENDPOINT + "/all", produces = MediaType.APPLICATION_JSON_VALUE)
-    Page<FactureDto> findAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size);
+    Page<FactureDto> findAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size,
+                             @RequestParam(required = false) String refFacture,
+                             @RequestParam(required = false) Double minMontatnTTC ,
+                             @RequestParam(required = false) Double maxMontatnTTC,
+                             @RequestParam(required = false) Boolean paymentStatus,
+                             @RequestParam(required = false) Long idClient,
+                             @RequestParam(required = false) LocalDate dateDebut,
+                             @RequestParam(required = false) LocalDate dateFin
+                             );
 
     @GetMapping(value = FACTURE_ENDPOINT + "/{idFacture}", produces = MediaType.APPLICATION_JSON_VALUE)
     FactureDto findById(@PathVariable("idFacture") Long id);
