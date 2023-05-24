@@ -176,7 +176,7 @@ public class FactureServiceImpl implements FactureService {
 
         document.open();
 
-        Image img = Image.getInstance("src/main/resources/logofacture.png");
+        Image img = Image.getInstance("classpath:logofacture.png");
         img.scalePercent(30);
         img.setScaleToFitLineWhenOverflow(true);
         document.add(img);
