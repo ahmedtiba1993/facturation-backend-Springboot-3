@@ -15,8 +15,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
 
-import static com.facturation.utils.Constants.FACTURE_ENDPOINT;
-import static com.facturation.utils.Constants.PRODUIT_ENDPOINT;
+import static com.facturation.utils.Constants.*;
 
 public interface FactureApi {
 
@@ -42,5 +41,8 @@ public interface FactureApi {
 
     @PostMapping(value = FACTURE_ENDPOINT +"/statutupdate/{idFacture}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Void> updateStatut(@PathVariable("idFacture") Long id);
+
+    @GetMapping(value =STATISTIQUE_ENDPOINT+ "/statique" , produces = MediaType.APPLICATION_JSON_VALUE)
+    com.facturation.model.projection.Statistique getStatistique();
 
 }

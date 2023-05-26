@@ -10,6 +10,7 @@ import com.facturation.model.Client;
 import com.facturation.model.Facture;
 import com.facturation.model.LigneFacture;
 import com.facturation.model.Produit;
+import com.facturation.model.projection.Statistique;
 import com.facturation.repository.*;
 import com.facturation.service.FactureService;
 import com.facturation.service.TimbreFiscalService;
@@ -54,8 +55,8 @@ public class FactureServiceImpl implements FactureService {
     private ProduitRepository produitRepository;
     private LigneFactureRepository ligneFactureRepository;
     private TimbreFiscalService timbreFiscalService;
-
     private NumFactureRepository numFactureRepository;
+
 
     @Autowired
     public FactureServiceImpl(FactureRepository factureRepository, ClientRepository clientRepository, ProduitRepository produitRepository, LigneFactureRepository ligneFactureRepository, TimbreFiscalService timbreFiscalService,NumFactureRepository numFactureRepository) {
@@ -437,6 +438,11 @@ public class FactureServiceImpl implements FactureService {
         }
 
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public Statistique getStatistique() {
+        return factureRepository.getStatistique();
     }
 
 }

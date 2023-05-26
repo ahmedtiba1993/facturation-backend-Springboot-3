@@ -2,6 +2,7 @@ package com.facturation.service;
 
 import com.facturation.dto.FactureDto;
 import com.facturation.dto.ProduitDto;
+import com.facturation.model.projection.Statistique;
 import com.itextpdf.text.DocumentException;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -25,5 +26,7 @@ public interface FactureService {
     ResponseEntity<InputStreamResource> generatePdf(Long id) throws DocumentException, IOException;
 
     ResponseEntity<Void> updateStatus(Long id);
+
+    Statistique getStatistique();
 
     }

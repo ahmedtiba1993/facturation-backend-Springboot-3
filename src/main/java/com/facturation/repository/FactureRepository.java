@@ -1,6 +1,7 @@
 package com.facturation.repository;
 
 import com.facturation.model.Facture;
+import com.facturation.model.projection.Statistique;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,4 +50,14 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
             "and (f.dateFacture >= :dateDebut or :dateDebut is null)" +
             "and (f.dateFacture <= :dateFin or :dateFin is null)")
     Page<Facture> findAllFiltre(Pageable pageable , String refFacture , Double minMontatnTTC , Double maxMontatnTTC , Boolean paymentStatus , Long idClient , LocalDate dateDebut , LocalDate dateFin);
+
+
+    @Query(value = "SELECT" +
+            "(select sum(facturation.facture.montantttc) FROM facturation.facture where facturation.facture.payment_status = 1) as montatPaye," +
+            "(select sum(facturation.facture.montantttc) FROM facturation.facture where facturation.facture.payment_status = 0) as montantNonPaye," +
+            "(select count(*) FROM facturation.facture where facturation.facture.payment_status = 1) as nbFacturePaye," +
+            "(select count(*) FROM facturation.facture where facturation.facture.payment_status = 0) as nbFactureNonPaye," +
+            "(select count(*) FROM facturation.facture) as nbClient",nativeQuery = true)
+    Statistique getStatistique();
+
 }

@@ -2,6 +2,7 @@ package com.facturation.controller;
 
 import com.facturation.controller.api.FactureApi;
 import com.facturation.dto.FactureDto;
+import com.facturation.model.projection.Statistique;
 import com.facturation.service.FactureService;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -63,5 +64,10 @@ public class FactureController implements FactureApi {
     @Override
     public ResponseEntity<Void> updateStatut(Long id) {
         return factureService.updateStatus(id);
+    }
+
+    @Override
+    public Statistique getStatistique() {
+        return factureService.getStatistique();
     }
 }
