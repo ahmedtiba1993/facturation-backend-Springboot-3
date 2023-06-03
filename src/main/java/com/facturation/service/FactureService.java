@@ -2,6 +2,7 @@ package com.facturation.service;
 
 import com.facturation.dto.FactureDto;
 import com.facturation.dto.ProduitDto;
+import com.facturation.model.projection.RecapClient;
 import com.facturation.model.projection.Statistique;
 import com.itextpdf.text.DocumentException;
 import org.springframework.core.io.InputStreamResource;
@@ -28,5 +29,7 @@ public interface FactureService {
     ResponseEntity<Void> updateStatus(Long id);
 
     Statistique getStatistique();
+
+    Page<RecapClient> getRecapClient(Pageable pageable);
 
     }

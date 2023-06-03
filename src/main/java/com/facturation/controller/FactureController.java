@@ -2,6 +2,7 @@ package com.facturation.controller;
 
 import com.facturation.controller.api.FactureApi;
 import com.facturation.dto.FactureDto;
+import com.facturation.model.projection.RecapClient;
 import com.facturation.model.projection.Statistique;
 import com.facturation.service.FactureService;
 import com.itextpdf.text.Document;
@@ -48,6 +49,9 @@ public class FactureController implements FactureApi {
     @Override
     public Page<FactureDto> findAll(int page, int size , String refFacture , Double minMontatnTTC , Double maxMontatnTTC , Boolean paymentStatus , Long idClient , LocalDate dateDebut , LocalDate dateFin) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        if(refFacture != null && refFacture.equals("")){
+            refFacture = null;
+        }
         return factureService.findAll(pageable , refFacture , minMontatnTTC , maxMontatnTTC,paymentStatus ,idClient , dateDebut , dateFin);
     }
 
@@ -69,5 +73,11 @@ public class FactureController implements FactureApi {
     @Override
     public Statistique getStatistique() {
         return factureService.getStatistique();
+    }
+
+    @Override
+    public Page<RecapClient> getRecapClient(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return factureService.getRecapClient(pageable);
     }
 }

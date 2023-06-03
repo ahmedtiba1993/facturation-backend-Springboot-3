@@ -10,6 +10,7 @@ import com.facturation.model.Client;
 import com.facturation.model.Facture;
 import com.facturation.model.LigneFacture;
 import com.facturation.model.Produit;
+import com.facturation.model.projection.RecapClient;
 import com.facturation.model.projection.Statistique;
 import com.facturation.repository.*;
 import com.facturation.service.FactureService;
@@ -102,9 +103,10 @@ public class FactureServiceImpl implements FactureService {
         }
 
         int tauxTva = 19;
+        double timbre = timbreFiscalService.getTimbreFiscale().getMontant();
         dto.setTauxTVA(tauxTva);
         dto.setReference(generateReference(client.get().getCode()));
-        dto.setTimbreFiscale(timbreFiscalService.getTimbreFiscale().getMontant());
+        dto.setTimbreFiscale(timbre);
         Facture saveFacture = factureRepository.save(FactureDto.toEntity(dto));
 
         double montantTotalProduit = 0.0;
@@ -125,7 +127,7 @@ public class FactureServiceImpl implements FactureService {
                 ligneFactureRepository.save(ligneFacture);
             }
         }
-        double montantTotal = montantTotalProduit + (montantTotalProduit * (tauxTva / 100.0));
+        double montantTotal = montantTotalProduit + (montantTotalProduit * (tauxTva / 100.0))+(timbre/1000);
         factureRepository.updateMontantTotal(saveFacture.getId(), montantTotalProduit,montantTotal);
         return FactureDto.fromEntity(saveFacture);
     }
@@ -138,7 +140,7 @@ public class FactureServiceImpl implements FactureService {
         Integer numFacture = numFactureRepository.getNumFacture();
         String nombreDeFacturesFormatte = decimalFormat.format(numFacture+1);
         numFactureRepository.updateNumFacture(numFacture+1);
-        return nombreDeFacturesFormatte+"/"+year;
+        return nombreDeFacturesFormatte+"-"+year;
     }
 
     @Override
@@ -399,7 +401,7 @@ public class FactureServiceImpl implements FactureService {
 
         Paragraph pp1 = new Paragraph("Arrêté la présente facture à la somme de :");
         document.add(pp1);
-        Paragraph pp2 = new Paragraph(convertirEnLettres(partieEntiere) +" dinars et "+convertirEnLettres(resultat)+" millimes.");
+        Paragraph pp2 = new Paragraph(convertirEnLettres(partieEntiere) +" dinars et ( "+resultat+" ) millimes.");
         document.add(pp2);
 
         document.close();
@@ -443,6 +445,11 @@ public class FactureServiceImpl implements FactureService {
     @Override
     public Statistique getStatistique() {
         return factureRepository.getStatistique();
+    }
+
+    @Override
+    public Page<RecapClient> getRecapClient(Pageable pageable) {
+        return factureRepository.getRecapClient(pageable);
     }
 
 }

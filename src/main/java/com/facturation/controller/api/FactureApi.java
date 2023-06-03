@@ -3,6 +3,8 @@ package com.facturation.controller.api;
 import com.facturation.dto.ClientDto;
 import com.facturation.dto.FactureDto;
 import com.facturation.dto.ProduitDto;
+import com.facturation.model.projection.RecapClient;
+import com.facturation.model.projection.Statistique;
 import com.itextpdf.text.DocumentException;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -43,6 +45,9 @@ public interface FactureApi {
     ResponseEntity<Void> updateStatut(@PathVariable("idFacture") Long id);
 
     @GetMapping(value =STATISTIQUE_ENDPOINT+ "/statique" , produces = MediaType.APPLICATION_JSON_VALUE)
-    com.facturation.model.projection.Statistique getStatistique();
+    Statistique getStatistique();
+
+    @GetMapping(value =STATISTIQUE_ENDPOINT+ "/recapClient" , produces = MediaType.APPLICATION_JSON_VALUE)
+    Page<RecapClient> getRecapClient(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size);
 
 }

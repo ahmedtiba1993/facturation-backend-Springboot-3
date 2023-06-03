@@ -1,6 +1,7 @@
 package com.facturation.repository;
 
 import com.facturation.model.Facture;
+import com.facturation.model.projection.RecapClient;
 import com.facturation.model.projection.Statistique;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -59,5 +60,20 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
             "(select count(*) FROM facturation.facture where facturation.facture.payment_status = 0) as nbFactureNonPaye," +
             "(select count(*) FROM facturation.facture) as nbClient",nativeQuery = true)
     Statistique getStatistique();
+
+
+    @Query(value="SELECT distinct facturation.client.id AS idClient," +
+            "  facturation.client.nom AS nomClient," +
+            "  facturation.client.prenom AS prenomClient," +
+            "  facturation.client.nom_commercial AS nomCommercial," +
+            "  (SELECT COUNT(*) FROM facturation.facture WHERE facturation.facture.client_id = facturation.client.id) AS numFacture," +
+            "  (SELECT sum(montantttc) FROM facturation.facture WHERE facture.payment_status = 0 ANd facture.client_id = facturation.client.id) AS nmontantNonPaye," +
+            "  (SELECT sum(montantttc) FROM facturation.facture WHERE facture.payment_status = 1 ANd facture.client_id = facturation.client.id) AS nmontantPaye" +
+            " FROM facturation.client " +
+            "LEFT JOIN" +
+            "  facturation.facture ON facturation.client.id = facturation.facture.client_id",
+            countQuery="SELECT count(*) FROM facturation.client",
+            nativeQuery = true)
+    Page<RecapClient> getRecapClient(Pageable pageable);
 
 }
