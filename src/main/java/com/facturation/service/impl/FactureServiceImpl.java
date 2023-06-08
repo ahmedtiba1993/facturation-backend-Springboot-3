@@ -110,9 +110,9 @@ public class FactureServiceImpl implements FactureService {
         Facture saveFacture = factureRepository.save(FactureDto.toEntity(dto));
 
         double montantTotalProduit = 0.0;
-        int remise = dto.getClient().getRemise();
         if(dto.getLignesFacture() != null) {
             for (LigneFactureDto ligneFact : dto.getLignesFacture()) {
+                int remise = ligneFact.getRemise();
                 double montantProduit = ligneFact.getProduit().getPrix() * ligneFact.getQuantite();
                 if(ligneFact.getProduit().getEtatRemise() == true){
                     montantTotalProduit = montantTotalProduit + (montantProduit - (montantProduit * (remise / 100.0)));
