@@ -30,6 +30,7 @@ import org.springframework.http.MediaType;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 @RestController
 public class FactureController implements FactureApi {
@@ -61,8 +62,8 @@ public class FactureController implements FactureApi {
     }
 
     @Override
-    public ResponseEntity<InputStreamResource> generatePdf(Long id) throws DocumentException, IOException {
-      return factureService.generatePdf(id);
+    public ResponseEntity<InputStreamResource> generatePdf(List<Long> ids) throws DocumentException, IOException {
+      return factureService.generatePdf(ids);
     }
 
     @Override

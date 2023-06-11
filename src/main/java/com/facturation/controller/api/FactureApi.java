@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 import static com.facturation.utils.Constants.*;
 
@@ -38,8 +39,8 @@ public interface FactureApi {
     @GetMapping(value = FACTURE_ENDPOINT + "/{idFacture}", produces = MediaType.APPLICATION_JSON_VALUE)
     FactureDto findById(@PathVariable("idFacture") Long id);
 
-    @GetMapping(value = FACTURE_ENDPOINT +"/generate-pdf"+ "/{idFacture}", produces = MediaType.APPLICATION_PDF_VALUE)
-    ResponseEntity<InputStreamResource> generatePdf(@PathVariable("idFacture") Long id) throws DocumentException, IOException;
+    @GetMapping(value = FACTURE_ENDPOINT +"/generate-pdf")
+    ResponseEntity<InputStreamResource> generatePdf(@RequestParam List<Long> ids) throws DocumentException, IOException;
 
     @PostMapping(value = FACTURE_ENDPOINT +"/statutupdate/{idFacture}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Void> updateStatut(@PathVariable("idFacture") Long id);

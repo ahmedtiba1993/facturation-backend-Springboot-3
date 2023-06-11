@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 public interface FactureService {
 
@@ -24,7 +25,7 @@ public interface FactureService {
 
     FactureDto findById(Long id);
 
-    ResponseEntity<InputStreamResource> generatePdf(Long id) throws DocumentException, IOException;
+    ResponseEntity<InputStreamResource> generatePdf(List<Long> ids) throws DocumentException, IOException;
 
     ResponseEntity<Void> updateStatus(Long id);
 
