@@ -177,15 +177,19 @@ public class FactureServiceImpl implements FactureService {
 
 
         document.open();
+        List<Facture> factureList = factureRepository.findFactureToPdf(ids);
 
-        for (Long id : ids) {
+        for (Facture facutre : factureList) {
             document.newPage();
-            Optional<Facture> facutre = factureRepository.findById(id);
 
             Image img = Image.getInstance("classpath:logofacture.png");
-            img.scalePercent(30);
+            img.scalePercent(35);
             img.setScaleToFitLineWhenOverflow(true);
-            document.add(img);
+            // Positionner l'image à gauche de la page
+            float marginLeft = document.leftMargin(); // Récupérer la marge gauche du document
+            float imageX = marginLeft + 20; // Décalage de 20 unités de la marge gauche
+            float imageY = document.getPageSize().getHeight() - img.getScaledHeight(); // Position verticale en haut de la page
+            img.setAbsolutePosition(imageX, imageY);            document.add(img);
 
             PdfPCell cellTitle = new PdfPCell();
             Paragraph title = new Paragraph("Alarme Assistace", new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD));
@@ -264,10 +268,10 @@ public class FactureServiceImpl implements FactureService {
 
             // première colonne : informations de la facture
             PdfPCell celltable1 = new PdfPCell();
-            Paragraph f1 = new Paragraph("Reference: " + facutre.get().getReference());
+            Paragraph f1 = new Paragraph("Reference: " + facutre.getReference());
             f1.setLeading(0, 1.5f);
 
-            Paragraph f2 = new Paragraph("Date: " + facutre.get().getDateFacture());
+            Paragraph f2 = new Paragraph("Date: " + facutre.getDateFacture());
             f2.setLeading(0, 1.5f);
 
             celltable1.setBorder(Rectangle.NO_BORDER);
@@ -278,20 +282,20 @@ public class FactureServiceImpl implements FactureService {
 
             // deuxième colonne : informations du client
             PdfPCell celltable2 = new PdfPCell();
-            Paragraph f3 = new Paragraph("Client: " + facutre.get().getClient().getNomCommercial());
+            Paragraph f3 = new Paragraph("Client: " + facutre.getClient().getNomCommercial());
             f3.setLeading(0, 1.5f);
 
-            Paragraph f4 = new Paragraph("Adresse: " + facutre.get().getClient().getAdresse());
+            Paragraph f4 = new Paragraph("Adresse: " + facutre.getClient().getAdresse());
             f4.setLeading(0, 1.5f);
 
-            Paragraph f5 = new Paragraph("MF: " + facutre.get().getClient().getCode());
+            Paragraph f5 = new Paragraph("MF: " + facutre.getClient().getCode());
             f5.setLeading(0, 1.5f);
 
             celltable2.setBorder(Rectangle.NO_BORDER);
             celltable2.addElement(f3);
             celltable2.addElement(f4);
             celltable2.addElement(f5);
-            celltable2.setPaddingLeft(110);
+            celltable2.setPaddingLeft(30);
             table.addCell(celltable2);
 
             table.setSpacingAfter(10f);
@@ -335,7 +339,7 @@ public class FactureServiceImpl implements FactureService {
 
             DecimalFormat df = new DecimalFormat("#0.000");
             // Ajout des produits
-            for (LigneFacture l : facutre.get().getLignesFacture()) {
+            for (LigneFacture l : facutre.getLignesFacture()) {
 
                 tableFacture.addCell(new PdfPCell(new Phrase(l.getProduit().getCode()))).setHorizontalAlignment(Element.ALIGN_CENTER);
                 tableFacture.addCell(new PdfPCell(new Phrase(l.getProduit().getDescription()))).setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -361,7 +365,7 @@ public class FactureServiceImpl implements FactureService {
             cellTotalBrut.setPaddingBottom(7);
             tablePrix.addCell(cellTotalBrut);
 
-            PdfPCell cellTotalBrutValue = new PdfPCell(new Phrase(String.valueOf(df.format(facutre.get().getMontantHt()) + " TND")));
+            PdfPCell cellTotalBrutValue = new PdfPCell(new Phrase(String.valueOf(df.format(facutre.getMontantHt()) + " TND")));
             cellTotalBrutValue.setBorder(Rectangle.NO_BORDER);
             cellTotalBrutValue.setPaddingTop(20);
             cellTotalBrutValue.setPaddingBottom(7);
@@ -372,7 +376,7 @@ public class FactureServiceImpl implements FactureService {
             cellTVA.setPaddingBottom(7);
             tablePrix.addCell(cellTVA);
 
-            PdfPCell cellTVAValue = new PdfPCell(new Phrase(String.valueOf(df.format(facutre.get().getMontantHt() * 0.19)) + " TND"));
+            PdfPCell cellTVAValue = new PdfPCell(new Phrase(String.valueOf(df.format(facutre.getMontantHt() * 0.19)) + " TND"));
             cellTVAValue.setPaddingBottom(7);
             cellTVAValue.setBorder(Rectangle.NO_BORDER);
             tablePrix.addCell(cellTVAValue);
@@ -391,14 +395,14 @@ public class FactureServiceImpl implements FactureService {
             cellTotalTTC.setBorder(Rectangle.NO_BORDER);
             tablePrix.addCell(cellTotalTTC);
 
-            PdfPCell cellTotalTTCValue = new PdfPCell(new Phrase(String.valueOf(df.format(facutre.get().getMontantTTC())) + " TND", new Font(Font.FontFamily.HELVETICA, 15, Font.BOLD)));
+            PdfPCell cellTotalTTCValue = new PdfPCell(new Phrase(String.valueOf(df.format(facutre.getMontantTTC())) + " TND", new Font(Font.FontFamily.HELVETICA, 15, Font.BOLD)));
             cellTotalTTCValue.setBorder(Rectangle.NO_BORDER);
             tablePrix.addCell(cellTotalTTCValue);
             tableFacture.setSpacingAfter(30);
             document.add(tablePrix); // ajoute la table au document
 
-            int partieEntiere = (int) Math.floor(facutre.get().getMontantTTC());
-            double partieDecimale = facutre.get().getMontantTTC() - Math.floor(facutre.get().getMontantTTC());
+            int partieEntiere = (int) Math.floor(facutre.getMontantTTC());
+            double partieDecimale = facutre.getMontantTTC() - Math.floor(facutre.getMontantTTC());
             int resultat = (int) (partieDecimale * 1000);
 
 

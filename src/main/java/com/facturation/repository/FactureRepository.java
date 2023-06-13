@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 public interface FactureRepository extends JpaRepository<Facture, Long> {
 
@@ -75,5 +76,8 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
             countQuery="SELECT count(*) FROM facturation.client",
             nativeQuery = true)
     Page<RecapClient> getRecapClient(Pageable pageable);
+
+    @Query("select fact from Facture fact where fact.id IN  :ids")
+    List<Facture> findFactureToPdf(List<Long> ids);
 
 }
