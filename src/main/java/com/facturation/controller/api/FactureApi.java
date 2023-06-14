@@ -51,4 +51,14 @@ public interface FactureApi {
     @GetMapping(value =STATISTIQUE_ENDPOINT+ "/recapClient" , produces = MediaType.APPLICATION_JSON_VALUE)
     Page<RecapClient> getRecapClient(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size);
 
+    @GetMapping(value = FACTURE_ENDPOINT + "/allIds", produces = MediaType.APPLICATION_JSON_VALUE)
+    List<Long> findAllIds(@RequestParam(required = false) String refFacture,
+                             @RequestParam(required = false) Double minMontatnTTC ,
+                             @RequestParam(required = false) Double maxMontatnTTC,
+                             @RequestParam(required = false) Boolean paymentStatus,
+                             @RequestParam(required = false) Long idClient,
+                             @RequestParam(required = false) LocalDate dateDebut,
+                             @RequestParam(required = false) LocalDate dateFin
+    );
+
 }

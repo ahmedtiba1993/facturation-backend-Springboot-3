@@ -81,4 +81,9 @@ public class FactureController implements FactureApi {
         Pageable pageable = PageRequest.of(page, size);
         return factureService.getRecapClient(pageable);
     }
+
+    @Override
+    public List<Long> findAllIds(String refFacture, Double minMontatnTTC, Double maxMontatnTTC, Boolean paymentStatus, Long idClient, LocalDate dateDebut, LocalDate dateFin) {
+        return factureService.findAllIds(refFacture , minMontatnTTC , maxMontatnTTC,paymentStatus ,idClient , dateDebut , dateFin);
+    }
 }

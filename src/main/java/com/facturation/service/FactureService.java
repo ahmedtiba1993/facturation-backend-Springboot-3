@@ -33,4 +33,6 @@ public interface FactureService {
 
     Page<RecapClient> getRecapClient(Pageable pageable);
 
+    List<Long> findAllIds(String refFacture , Double minMontatnTTC , Double maxMontatnTTC , Boolean paymentStatus , Long idClient , LocalDate dateDebut , LocalDate dateFin);
+
     }

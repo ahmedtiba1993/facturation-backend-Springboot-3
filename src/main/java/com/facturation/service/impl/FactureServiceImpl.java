@@ -459,4 +459,9 @@ public class FactureServiceImpl implements FactureService {
         return factureRepository.getRecapClient(pageable);
     }
 
+    @Override
+    public List<Long> findAllIds(String refFacture, Double minMontatnTTC, Double maxMontatnTTC, Boolean paymentStatus, Long idClient, LocalDate dateDebut, LocalDate dateFin) {
+        return factureRepository.findAllIds(refFacture , minMontatnTTC , maxMontatnTTC , paymentStatus , idClient , dateDebut , dateFin);
+    }
+
 }

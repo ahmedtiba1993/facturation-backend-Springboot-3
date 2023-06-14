@@ -53,6 +53,15 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
             "and (f.dateFacture <= :dateFin or :dateFin is null)")
     Page<Facture> findAllFiltre(Pageable pageable , String refFacture , Double minMontatnTTC , Double maxMontatnTTC , Boolean paymentStatus , Long idClient , LocalDate dateDebut , LocalDate dateFin);
 
+    @Query("SELECT f.id FROM Facture f WHERE " +
+            "(f.reference = :refFacture OR :refFacture IS NULL)" +
+            "and (f.montantTTC >= :minMontatnTTC or :minMontatnTTC is null )" +
+            "and (f.montantTTC <= :maxMontatnTTC or :maxMontatnTTC is null )" +
+            "and (f.paymentStatus = :paymentStatus or :paymentStatus is null)" +
+            "and (f.client.id = :idClient or :idClient is null)" +
+            "and (f.dateFacture >= :dateDebut or :dateDebut is null)" +
+            "and (f.dateFacture <= :dateFin or :dateFin is null)")
+    List<Long> findAllIds(String refFacture , Double minMontatnTTC , Double maxMontatnTTC , Boolean paymentStatus , Long idClient , LocalDate dateDebut , LocalDate dateFin);
 
     @Query(value = "SELECT" +
             "(select sum(facturation.facture.montantttc) FROM facturation.facture where facturation.facture.payment_status = 1) as montatPaye," +
