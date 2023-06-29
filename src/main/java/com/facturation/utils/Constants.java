@@ -7,8 +7,8 @@ public interface Constants {
     String CATEGORRIE_ENDPOINT = APP_ROOT + "/categorie";
     String CLIENT_ENDPOINT = APP_ROOT + "/client";
     String FACTURE_ENDPOINT = APP_ROOT + "/facture";
-
     String STATISTIQUE_ENDPOINT = APP_ROOT + "/statistique";
+    String USER_ENDPOINT = APP_ROOT + "/user";
 
 
 
