@@ -26,7 +26,6 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
@@ -35,55 +34,86 @@ import java.util.List;
 @RestController
 public class FactureController implements FactureApi {
 
-    private FactureService factureService;
+  private FactureService factureService;
 
-    @Autowired
-    public FactureController(FactureService factureService) {
-        this.factureService = factureService;
-    }
+  @Autowired
+  public FactureController(FactureService factureService) {
+    this.factureService = factureService;
+  }
 
-    @Override
-    public FactureDto save(FactureDto dto) {
-        return factureService.save(dto);
-    }
+  @Override
+  public FactureDto save(FactureDto dto) {
+    return factureService.save(dto);
+  }
 
-    @Override
-    public Page<FactureDto> findAll(int page, int size , String refFacture , Double minMontatnTTC , Double maxMontatnTTC , Boolean paymentStatus , Long idClient , LocalDate dateDebut , LocalDate dateFin) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-        if(refFacture != null && refFacture.equals("")){
-            refFacture = null;
-        }
-        return factureService.findAll(pageable , refFacture , minMontatnTTC , maxMontatnTTC,paymentStatus ,idClient , dateDebut , dateFin);
+  @Override
+  public Page<FactureDto> findAll(
+      int page,
+      int size,
+      String refFacture,
+      Double minMontatnTTC,
+      Double maxMontatnTTC,
+      Boolean paymentStatus,
+      Long idClient,
+      LocalDate dateDebut,
+      LocalDate dateFin) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+    if (refFacture != null && refFacture.equals("")) {
+      refFacture = null;
     }
+    return factureService.findAll(
+        pageable,
+        refFacture,
+        minMontatnTTC,
+        maxMontatnTTC,
+        paymentStatus,
+        idClient,
+        dateDebut,
+        dateFin);
+  }
 
-    @Override
-    public FactureDto findById(Long id) {
-        return factureService.findById(id);
-    }
+  @Override
+  public FactureDto findById(Long id) {
+    return factureService.findById(id);
+  }
 
-    @Override
-    public ResponseEntity<InputStreamResource> generatePdf(List<Long> ids) throws DocumentException, IOException {
-      return factureService.generatePdf(ids);
-    }
+  @Override
+  public ResponseEntity<InputStreamResource> generatePdf(List<Long> ids)
+      throws DocumentException, IOException {
+    return factureService.generatePdf(ids);
+  }
 
-    @Override
-    public ResponseEntity<Void> updateStatut(Long id) {
-        return factureService.updateStatus(id);
-    }
+  @Override
+  public ResponseEntity<Void> updateStatut(Long id) {
+    return factureService.updateStatus(id);
+  }
 
-    @Override
-    public Statistique getStatistique() {
-        return factureService.getStatistique();
-    }
+  @Override
+  public Statistique getStatistique() {
+    return factureService.getStatistique();
+  }
 
-    @Override
-    public Page<RecapClient> getRecapClient(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return factureService.getRecapClient(pageable);
-    }
+  @Override
+  public Page<RecapClient> getRecapClient(int page, int size) {
+    Pageable pageable = PageRequest.of(page, size);
+    return factureService.getRecapClient(pageable);
+  }
 
-    @Override
-    public List<Long> findAllIds(String refFacture, Double minMontatnTTC, Double maxMontatnTTC, Boolean paymentStatus, Long idClient, LocalDate dateDebut, LocalDate dateFin) {
-        return factureService.findAllIds(refFacture , minMontatnTTC , maxMontatnTTC,paymentStatus ,idClient , dateDebut , dateFin);
-    }
+  @Override
+  public List<Long> findAllIds(
+      String refFacture,
+      Double minMontatnTTC,
+      Double maxMontatnTTC,
+      Boolean paymentStatus,
+      Long idClient,
+      LocalDate dateDebut,
+      LocalDate dateFin) {
+    return factureService.findAllIds(
+        refFacture, minMontatnTTC, maxMontatnTTC, paymentStatus, idClient, dateDebut, dateFin);
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteFacture(Long id) {
+    return factureService.deleteFacture(id);
+  }
 }

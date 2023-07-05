@@ -17,22 +17,39 @@ import java.util.List;
 
 public interface FactureService {
 
-    FactureDto save(FactureDto dto);
+  FactureDto save(FactureDto dto);
 
-    String generateReference(String codeClient);
+  String generateReference(String codeClient);
 
-    Page<FactureDto> findAll(Pageable pageable , String refFacture , Double minMontatnTTC , Double maxMontatnTTC , Boolean paymentStatus , Long idClient , LocalDate dateDebut , LocalDate dateFin);
+  Page<FactureDto> findAll(
+      Pageable pageable,
+      String refFacture,
+      Double minMontatnTTC,
+      Double maxMontatnTTC,
+      Boolean paymentStatus,
+      Long idClient,
+      LocalDate dateDebut,
+      LocalDate dateFin);
 
-    FactureDto findById(Long id);
+  FactureDto findById(Long id);
 
-    ResponseEntity<InputStreamResource> generatePdf(List<Long> ids) throws DocumentException, IOException;
+  ResponseEntity<InputStreamResource> generatePdf(List<Long> ids)
+      throws DocumentException, IOException;
 
-    ResponseEntity<Void> updateStatus(Long id);
+  ResponseEntity<Void> updateStatus(Long id);
 
-    Statistique getStatistique();
+  Statistique getStatistique();
 
-    Page<RecapClient> getRecapClient(Pageable pageable);
+  Page<RecapClient> getRecapClient(Pageable pageable);
 
-    List<Long> findAllIds(String refFacture , Double minMontatnTTC , Double maxMontatnTTC , Boolean paymentStatus , Long idClient , LocalDate dateDebut , LocalDate dateFin);
+  List<Long> findAllIds(
+      String refFacture,
+      Double minMontatnTTC,
+      Double maxMontatnTTC,
+      Boolean paymentStatus,
+      Long idClient,
+      LocalDate dateDebut,
+      LocalDate dateFin);
 
-    }
+  ResponseEntity<Void> deleteFacture(Long id);
+}

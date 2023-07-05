@@ -58,6 +58,8 @@ public class FactureServiceImpl implements FactureService {
   private TimbreFiscalService timbreFiscalService;
   private NumFactureRepository numFactureRepository;
 
+  private TvaRepository tvaRepository;
+
   @Autowired
   public FactureServiceImpl(
       FactureRepository factureRepository,
@@ -65,13 +67,15 @@ public class FactureServiceImpl implements FactureService {
       ProduitRepository produitRepository,
       LigneFactureRepository ligneFactureRepository,
       TimbreFiscalService timbreFiscalService,
-      NumFactureRepository numFactureRepository) {
+      NumFactureRepository numFactureRepository,
+      TvaRepository tvaRepository) {
     this.factureRepository = factureRepository;
     this.clientRepository = clientRepository;
     this.produitRepository = produitRepository;
     this.ligneFactureRepository = ligneFactureRepository;
     this.timbreFiscalService = timbreFiscalService;
     this.numFactureRepository = numFactureRepository;
+    this.tvaRepository = tvaRepository;
   }
 
   @Override
@@ -97,7 +101,7 @@ public class FactureServiceImpl implements FactureService {
           Optional<Produit> produit =
               produitRepository.findById(ligneFactureDto.getProduit().getId());
           if (produit.isEmpty()) {
-            log.error("Produit not fond dans facture ", ligneFactureDto.getProduit().getId());
+            log.error("Produit not found dans facture ", ligneFactureDto.getProduit().getId());
             produitErrors.add("prodtui introvable '");
           }
         }
@@ -110,7 +114,7 @@ public class FactureServiceImpl implements FactureService {
           "prodiot n'existe pas dans la BDD", ErrorCodes.PRODUIT_NOT_FOUND, produitErrors);
     }
 
-    int tauxTva = 19;
+    int tauxTva = tvaRepository.getTvaByCode("TVA").getTva();
     double timbre = timbreFiscalService.getTimbreFiscale().getMontant();
     dto.setTauxTVA(tauxTva);
     dto.setReference(generateReference(client.get().getCode()));
@@ -525,5 +529,15 @@ public class FactureServiceImpl implements FactureService {
       LocalDate dateFin) {
     return factureRepository.findAllIds(
         refFacture, minMontatnTTC, maxMontatnTTC, paymentStatus, idClient, dateDebut, dateFin);
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteFacture(Long id) {
+    if (id == null) {
+      return null;
+    }
+    ligneFactureRepository.deleteByIdFacture(id);
+    factureRepository.deleteById(id);
+    return ResponseEntity.ok().build();
   }
 }
