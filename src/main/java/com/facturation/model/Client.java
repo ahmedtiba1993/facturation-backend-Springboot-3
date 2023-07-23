@@ -14,25 +14,27 @@ import java.util.List;
 @Entity
 public class Client implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String nom;
+  private String nom;
 
-    private String prenom;
+  private String prenom;
 
-    private String nomCommercial;
+  private String nomCommercial;
 
-    private String adresse;
+  private String adresse;
 
-    private int tel;
+  private int tel;
 
-    private String code;
+  private String code;
 
-    private int remise;
+  private int remise;
 
-    @OneToMany(mappedBy = "client",fetch = FetchType.LAZY)
-    private List<Facture> factures;
+  @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
+  private List<Facture> factures;
 
+  @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
+  private List<Devis> devis;
 }
