@@ -1,8 +1,6 @@
 package com.facturation.dto;
 
-import com.facturation.model.Facture;
 import com.facturation.model.LigneFacture;
-import com.facturation.model.Produit;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,51 +8,51 @@ import lombok.Data;
 @Data
 public class LigneFactureDto {
 
-    private Long id;
+  private Long id;
 
-    private FactureDto facture;
+  private FactureDto facture;
 
-    private ProduitDto produit;
+  private ProduitDto produit;
 
-    private int quantite;
+  private int quantite;
 
-    private double prixUnitaire;
+  private double prixUnitaire;
 
-    private int remise;
+  private int remise;
 
-    private double prixTotal;
+  private double prixTotal;
 
-    public static LigneFactureDto fromEntity(LigneFacture ligneFacture) {
+  public static LigneFactureDto fromEntity(LigneFacture ligneFacture) {
 
-        if(ligneFacture == null) {
-            return null;
-        }
-
-        return LigneFactureDto.builder()
-                .id(ligneFacture.getId())
-                //.facture(FactureDto.fromEntity(ligneFacture.getFacture()))
-                .produit(ProduitDto.fromEntity(ligneFacture.getProduit()))
-                .quantite(ligneFacture.getQuantite())
-                .prixUnitaire(ligneFacture.getPrixUnitaire())
-                .remise(ligneFacture.getRemise())
-                .prixTotal(ligneFacture.getPrixTotal())
-                .build();
+    if (ligneFacture == null) {
+      return null;
     }
 
-    public static LigneFacture toEntity(LigneFactureDto dto) {
+    return LigneFactureDto.builder()
+        .id(ligneFacture.getId())
+        // .facture(FactureDto.fromEntity(ligneFacture.getFacture()))
+        .produit(ProduitDto.fromEntity(ligneFacture.getProduit()))
+        .quantite(ligneFacture.getQuantite())
+        .prixUnitaire(ligneFacture.getPrixUnitaire())
+        .remise(ligneFacture.getRemise())
+        .prixTotal(ligneFacture.getPrixTotal())
+        .build();
+  }
 
-        if(dto == null) {
-            return null;
-        }
+  public static LigneFacture toEntity(LigneFactureDto dto) {
 
-        LigneFacture ligneFacture = new LigneFacture();
-        ligneFacture.setId(dto.getId());
-        //ligneFacture.setFacture(FactureDto.toEntity(dto.getFacture()));
-        ligneFacture.setProduit(ProduitDto.toEntity(dto.getProduit()));
-        ligneFacture.setPrixUnitaire(dto.prixUnitaire);
-        ligneFacture.setQuantite(dto.quantite);
-        ligneFacture.setRemise(dto.getRemise());
-        ligneFacture.setPrixTotal(dto.getPrixTotal());
-        return ligneFacture;
+    if (dto == null) {
+      return null;
     }
+
+    LigneFacture ligneFacture = new LigneFacture();
+    ligneFacture.setId(dto.getId());
+    // ligneFacture.setFacture(FactureDto.toEntity(dto.getFacture()));
+    ligneFacture.setProduit(ProduitDto.toEntity(dto.getProduit()));
+    ligneFacture.setPrixUnitaire(dto.prixUnitaire);
+    ligneFacture.setQuantite(dto.quantite);
+    ligneFacture.setRemise(dto.getRemise());
+    ligneFacture.setPrixTotal(dto.getPrixTotal());
+    return ligneFacture;
+  }
 }

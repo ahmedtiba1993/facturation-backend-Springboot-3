@@ -1,6 +1,5 @@
 package com.facturation.dto;
 
-import com.facturation.model.Client;
 import com.facturation.model.Facture;
 import com.facturation.model.LigneFacture;
 import lombok.Builder;
@@ -14,69 +13,67 @@ import java.util.stream.Collectors;
 @Builder
 public class FactureDto {
 
-    private Long id;
+  private Long id;
 
-    private int tauxTVA;
+  private int tauxTVA;
 
-    private Double montantTTC;
+  private Double montantTTC;
 
-    private Double montantHt;
+  private Double montantHt;
 
-    private ClientDto client;
+  private ClientDto client;
 
-    private String reference;
+  private String reference;
 
-    private double timbreFiscale;
+  private double timbreFiscale;
 
-    private LocalDate dateFacture;
+  private LocalDate dateFacture;
 
-    private List<LigneFactureDto> lignesFacture;
+  private List<LigneFactureDto> lignesFacture;
 
-    private Boolean paymentStatus;
+  private Boolean paymentStatus;
 
-    public static FactureDto fromEntity (Facture facture) {
+  public static FactureDto fromEntity(Facture facture) {
 
-        if(facture == null) {
-            return null;
-        }
-
-        return FactureDto.builder()
-                .id(facture.getId())
-                .montantHt(facture.getMontantHt())
-                .montantTTC(facture.getMontantTTC())
-                .tauxTVA(facture.getTauxTVA())
-                .reference(facture.getReference())
-                .client(ClientDto.fromEntity(facture.getClient()))
-                .timbreFiscale(facture.getTimbreFiscale())
-                .paymentStatus(facture.getPaymentStatus())
-                .lignesFacture(
-                        facture.getLignesFacture() !=null ?
-                                facture.getLignesFacture().stream()
-                                        .map(LigneFactureDto::fromEntity)
-                                        .collect(Collectors.toList()) :null
-                )
-                .dateFacture(facture.getDateFacture())
-                .build();
+    if (facture == null) {
+      return null;
     }
 
-    public static Facture toEntity(FactureDto dto) {
+    return FactureDto.builder()
+        .id(facture.getId())
+        .montantHt(facture.getMontantHt())
+        .montantTTC(facture.getMontantTTC())
+        .tauxTVA(facture.getTauxTVA())
+        .reference(facture.getReference())
+        .client(ClientDto.fromEntity(facture.getClient()))
+        .timbreFiscale(facture.getTimbreFiscale())
+        .paymentStatus(facture.getPaymentStatus())
+        .lignesFacture(
+            facture.getLignesFacture() != null
+                ? facture.getLignesFacture().stream()
+                    .map(LigneFactureDto::fromEntity)
+                    .collect(Collectors.toList())
+                : null)
+        .dateFacture(facture.getDateFacture())
+        .build();
+  }
 
-        if (dto == null) {
-            return null;
-        }
+  public static Facture toEntity(FactureDto dto) {
 
-        Facture facture = new Facture();
-        facture.setId(dto.getId());
-        facture.setMontantTTC(dto.getMontantTTC());
-        facture.setMontantHt(dto.getMontantHt());
-        facture.setTauxTVA(dto.getTauxTVA());
-        facture.setReference(dto.getReference());
-        facture.setClient(ClientDto.toEntity(dto.getClient()));
-        facture.setTimbreFiscale(dto.getTimbreFiscale());
-        facture.setDateFacture(dto.getDateFacture());
-        facture.setPaymentStatus(dto.getPaymentStatus());
-        return facture;
-
+    if (dto == null) {
+      return null;
     }
 
+    Facture facture = new Facture();
+    facture.setId(dto.getId());
+    facture.setMontantTTC(dto.getMontantTTC());
+    facture.setMontantHt(dto.getMontantHt());
+    facture.setTauxTVA(dto.getTauxTVA());
+    facture.setReference(dto.getReference());
+    facture.setClient(ClientDto.toEntity(dto.getClient()));
+    facture.setTimbreFiscale(dto.getTimbreFiscale());
+    facture.setDateFacture(dto.getDateFacture());
+    facture.setPaymentStatus(dto.getPaymentStatus());
+    return facture;
+  }
 }

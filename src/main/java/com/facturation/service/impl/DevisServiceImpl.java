@@ -2,7 +2,6 @@ package com.facturation.service.impl;
 
 import com.facturation.dto.DevisDto;
 import com.facturation.dto.FactureDto;
-import com.facturation.dto.LigneFactureDto;
 import com.facturation.exception.EntityNotFoundException;
 import com.facturation.exception.ErrorCodes;
 import com.facturation.exception.InvalidEntityException;
@@ -11,7 +10,6 @@ import com.facturation.repository.*;
 import com.facturation.service.DevisService;
 import com.facturation.service.TimbreFiscalService;
 import com.facturation.validator.DevisValidator;
-import com.facturation.validator.FactureValidator;
 import com.itextpdf.text.DocumentException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +24,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 @Slf4j
@@ -139,20 +138,24 @@ public class DevisServiceImpl implements DevisService {
       Long idClient,
       LocalDate dateDebut,
       LocalDate dateFin) {
-    return devisRepository.findAllDevisDto(
-        pageable,
-        refdevis,
-        minMontatnTTC,
-        maxMontatnTTC,
-        paymentStatus,
-        idClient,
-        dateDebut,
-        dateFin);
+    Page<Devis> devis =
+        devisRepository.findAllFiltre(
+            pageable,
+            refdevis,
+            minMontatnTTC,
+            maxMontatnTTC,
+            paymentStatus,
+            idClient,
+            dateDebut,
+            dateFin);
+    Function<Devis, DevisDto> converter = DevisDto::fromEntity;
+    Page<DevisDto> devisDtosPage = devis.map(converter);
+    return devisDtosPage;
   }
 
   @Override
   public DevisDto findById(Long id) {
-    return devisRepository.findDevisById(id);
+    return devisRepository.findDevisDtoById(id);
   }
 
   @Override

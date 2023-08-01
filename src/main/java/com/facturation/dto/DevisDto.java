@@ -1,6 +1,8 @@
 package com.facturation.dto;
 
 import com.facturation.model.Client;
+import com.facturation.model.Devis;
+import com.facturation.model.Facture;
 import com.facturation.model.LigneDevis;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
@@ -11,15 +13,13 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Builder
-@AllArgsConstructor
 public class DevisDto {
 
   private Long id;
-
-  private LocalDate dateDevis;
 
   private int tauxTVA;
 
@@ -27,56 +27,59 @@ public class DevisDto {
 
   private Double montantHt;
 
+  private ClientDto client;
+
   private String reference;
 
   private double timbreFiscale;
 
+  private LocalDate dateDevis;
+
+  private List<LigneDevisDto> ligneDevis;
+
   private Boolean paymentStatus;
 
-  private ClientDto clientDto;
+  public static DevisDto fromEntity(Devis devis) {
 
-  private List<LigneDevis> ligneDevis;
+    if (devis == null) {
+      return null;
+    }
 
-  public DevisDto(
-      Long id,
-      LocalDate dateDevis,
-      int tauxTVA,
-      Double montantTTC,
-      Double montantHt,
-      String reference,
-      double timbreFiscale,
-      Boolean paymentStatus,
-      Long clientId,
-      String clientNom,
-      String clientPrenom) {
-    this.id = id;
-    this.dateDevis = dateDevis;
-    this.tauxTVA = tauxTVA;
-    this.montantTTC = montantTTC;
-    this.montantHt = montantHt;
-    this.reference = reference;
-    this.timbreFiscale = timbreFiscale;
-    this.paymentStatus = paymentStatus;
-    this.clientDto = ClientDto.builder().id(clientId).nom(clientNom).prenom(clientPrenom).build();
+    return DevisDto.builder()
+        .id(devis.getId())
+        .montantHt(devis.getMontantHt())
+        .montantTTC(devis.getMontantTTC())
+        .tauxTVA(devis.getTauxTVA())
+        .reference(devis.getReference())
+        .client(ClientDto.fromEntity(devis.getClient()))
+        .timbreFiscale(devis.getTimbreFiscale())
+        .paymentStatus(devis.getPaymentStatus())
+        .ligneDevis(
+            devis.getLigneDevis() != null
+                ? devis.getLigneDevis().stream()
+                    .map(LigneDevisDto::fromEntity)
+                    .collect(Collectors.toList())
+                : null)
+        .dateDevis(devis.getDateDevis())
+        .build();
   }
 
-  public DevisDto(
-      Long id,
-      LocalDate dateDevis,
-      int tauxTVA,
-      Double montantTTC,
-      Double montantHt,
-      String reference,
-      double timbreFiscale,
-      Boolean paymentStatus,
-      Client client) {
-    this.id = id;
-    this.dateDevis = dateDevis;
-    this.tauxTVA = tauxTVA;
-    this.montantTTC = montantTTC;
-    this.montantHt = montantHt;
-    this.reference = reference;
-    this.timbreFiscale = timbreFiscale;
-    this.paymentStatus = paymentStatus;
+  public static Devis toEntity(DevisDto dto) {
+
+    if (dto == null) {
+      return null;
+    }
+
+    Devis devis = new Devis();
+    devis.setId(dto.getId());
+    devis.setMontantTTC(dto.getMontantTTC());
+    devis.setMontantHt(dto.getMontantHt());
+    devis.setTauxTVA(dto.getTauxTVA());
+    devis.setReference(dto.getReference());
+    devis.setClient(ClientDto.toEntity(dto.getClient()));
+    devis.setTimbreFiscale(dto.getTimbreFiscale());
+    devis.setDateDevis(dto.getDateDevis());
+    devis.setPaymentStatus(dto.getPaymentStatus());
+    return devis;
   }
 }

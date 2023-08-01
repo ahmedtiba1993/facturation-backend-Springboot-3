@@ -16,9 +16,7 @@ import java.time.LocalDate;
 public interface DevisRepository extends JpaRepository<Devis, Long> {
 
   @Query(
-      "SELECT NEW com.facturation.dto.DevisDto("
-          + "d.id, d.dateDevis, d.tauxTVA, d.montantTTC, d.montantHt, d.reference, d.timbreFiscale, d.paymentStatus, "
-          + "d.client.id, d.client.nom, d.client.prenom) "
+      "SELECT d "
           + "FROM Devis d WHERE "
           + "(d.reference = :refDevis OR :refDevis IS NULL)"
           + "and (d.montantTTC >= :minMontatnTTC or :minMontatnTTC is null )"
@@ -27,7 +25,7 @@ public interface DevisRepository extends JpaRepository<Devis, Long> {
           + "and (d.client.id = :idClient or :idClient is null)"
           + "and (d.dateDevis >= :dateDebut or :dateDebut is null)"
           + "and (d.dateDevis <= :dateFin or :dateFin is null)")
-  Page<DevisDto> findAllDevisDto(
+  Page<Devis> findAllFiltre(
       Pageable pageable,
       String refDevis,
       Double minMontatnTTC,
@@ -36,16 +34,6 @@ public interface DevisRepository extends JpaRepository<Devis, Long> {
       Long idClient,
       LocalDate dateDebut,
       LocalDate dateFin);
-
-  @Query(
-      value =
-          "SELECT d.id AS id, d.date_devis AS dateDevis, d.taux_tva AS tauxTVA, "
-              + "d.montant_ttc AS montantTTC, d.montant_ht AS montantHt, "
-              + "d.reference AS reference, d.timbre_fiscale AS timbreFiscale, "
-              + "d.payment_status AS paymentStatus "
-              + "FROM devis d WHERE d.id = ?1",
-      nativeQuery = true)
-  DevisDto findDevisById(Long id);
 
   @Transactional
   @Modifying
@@ -58,4 +46,12 @@ public interface DevisRepository extends JpaRepository<Devis, Long> {
       @Param("idDevis") Long idDevis,
       @Param("montantHt") double montantHt,
       @Param("montantTTC") double montantTTC);
+
+  @Query(
+      "SELECT d "
+          + "FROM Devis d "
+          + "LEFT JOIN d.client c "
+          + "LEFT JOIN d.ligneDevis ld "
+          + "WHERE d.id = :devisId")
+  DevisDto findDevisDtoById(@Param("devisId") Long devisId);
 }

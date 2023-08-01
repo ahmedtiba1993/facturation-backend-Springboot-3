@@ -1,7 +1,6 @@
 package com.facturation.service;
 
 import com.facturation.dto.DevisDto;
-import com.facturation.dto.FactureDto;
 import com.facturation.model.Devis;
 import com.itextpdf.text.DocumentException;
 import org.springframework.core.io.InputStreamResource;
@@ -12,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface DevisService {
 
