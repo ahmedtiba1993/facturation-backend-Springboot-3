@@ -29,7 +29,7 @@ public class DevisController implements DevisApi {
   }
 
   @Override
-  public Devis save(Devis devis) {
+  public DevisDto save(Devis devis) {
     return devisService.save(devis);
   }
 

@@ -23,7 +23,7 @@ public interface DevisApi {
       value = DEVIS_ENDPOINT + "/create",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  Devis save(@RequestBody Devis dto);
+  DevisDto save(@RequestBody Devis dto);
 
   @GetMapping(value = DEVIS_ENDPOINT + "/all", produces = MediaType.APPLICATION_JSON_VALUE)
   Page<DevisDto> findAll(

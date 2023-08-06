@@ -11,6 +11,9 @@ public interface NumFactureRepository extends JpaRepository<NumFacture, Long> {
   @Query(value = "SELECT num_facture FROM num_facture LIMIT 1", nativeQuery = true)
   Integer getNumFacture();
 
+  @Query(value = "SELECT num_devis FROM num_facture LIMIT 1", nativeQuery = true)
+  Integer getNumDevis();
+
   @Query(value = "SELECT * FROM num_facture LIMIT 1", nativeQuery = true)
   NumFacture getNumberFacture();
 
@@ -18,4 +21,9 @@ public interface NumFactureRepository extends JpaRepository<NumFacture, Long> {
   @Modifying
   @Query(value = "update num_facture set num_facture =:num", nativeQuery = true)
   void updateNumFacture(Integer num);
+
+  @Transactional
+  @Modifying
+  @Query(value = "update num_facture set num_devis =:num", nativeQuery = true)
+  void updateNumDevis(Integer num);
 }

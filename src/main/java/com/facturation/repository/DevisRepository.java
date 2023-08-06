@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface DevisRepository extends JpaRepository<Devis, Long> {
 
@@ -54,4 +55,7 @@ public interface DevisRepository extends JpaRepository<Devis, Long> {
           + "LEFT JOIN d.ligneDevis ld "
           + "WHERE d.id = :devisId")
   DevisDto findDevisDtoById(@Param("devisId") Long devisId);
+
+  @Query("select d from Devis d where d.id IN  :ids")
+  List<Devis> findDevisToPdf(List<Long> ids);
 }

@@ -14,9 +14,11 @@ import lombok.NoArgsConstructor;
 @Entity
 public class NumFacture {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private Integer numFacture;
+  private Integer numFacture;
+
+  private Integer numDevis;
 }

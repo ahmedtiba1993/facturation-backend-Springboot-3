@@ -300,7 +300,7 @@ public class FactureServiceImpl implements FactureService {
 
       // première colonne : informations de la facture
       PdfPCell celltable1 = new PdfPCell();
-      Paragraph f1 = new Paragraph("Reference: " + facutre.getReference());
+      Paragraph f1 = new Paragraph("facture: " + facutre.getReference());
       f1.setLeading(0, 1.5f);
 
       Paragraph f2 = new Paragraph("Date: " + facutre.getDateFacture());

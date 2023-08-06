@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public interface DevisService {
 
-  Devis save(Devis devis);
+  DevisDto save(Devis devis);
 
   String generateReference();
 
