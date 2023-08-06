@@ -58,4 +58,14 @@ public interface DevisRepository extends JpaRepository<Devis, Long> {
 
   @Query("select d from Devis d where d.id IN  :ids")
   List<Devis> findDevisToPdf(List<Long> ids);
+
+  @Modifying
+  @Transactional
+  @Query("UPDATE Devis d SET d.paymentStatus = true WHERE d.id = :id")
+  void setStatusTrue(Long id);
+
+  @Modifying
+  @Transactional
+  @Query("UPDATE Devis d SET d.paymentStatus = false WHERE d.id = :id")
+  void setStatusFalse(Long id);
 }

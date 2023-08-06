@@ -476,7 +476,23 @@ public class DevisServiceImpl implements DevisService {
 
   @Override
   public ResponseEntity<Void> updateStatus(Long id) {
-    return null;
+    if (id == null) {
+      return null;
+    }
+
+    Optional<Devis> devis = devisRepository.findById(id);
+
+    if (!devis.isPresent()) {
+      throw new EntityNotFoundException(
+          "Aucune facture trouvée dans la base de données", ErrorCodes.FACTURE_NOT_FOUND);
+    }
+    if (devis.get().getPaymentStatus() != null && devis.get().getPaymentStatus()) {
+      devisRepository.setStatusFalse(id);
+    } else {
+      devisRepository.setStatusTrue(id);
+    }
+
+    return ResponseEntity.ok().build();
   }
 
   @Override
