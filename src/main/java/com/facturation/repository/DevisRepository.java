@@ -68,4 +68,22 @@ public interface DevisRepository extends JpaRepository<Devis, Long> {
   @Transactional
   @Query("UPDATE Devis d SET d.paymentStatus = false WHERE d.id = :id")
   void setStatusFalse(Long id);
+
+  @Query(
+      "SELECT f.id FROM Devis f WHERE "
+          + "(f.reference = :refFacture OR :refFacture IS NULL)"
+          + "and (f.montantTTC >= :minMontatnTTC or :minMontatnTTC is null )"
+          + "and (f.montantTTC <= :maxMontatnTTC or :maxMontatnTTC is null )"
+          + "and (f.paymentStatus = :paymentStatus or :paymentStatus is null)"
+          + "and (f.client.id = :idClient or :idClient is null)"
+          + "and (f.dateDevis >= :dateDebut or :dateDebut is null)"
+          + "and (f.dateDevis <= :dateFin or :dateFin is null)")
+  List<Long> findAllIds(
+      String refFacture,
+      Double minMontatnTTC,
+      Double maxMontatnTTC,
+      Boolean paymentStatus,
+      Long idClient,
+      LocalDate dateDebut,
+      LocalDate dateFin);
 }

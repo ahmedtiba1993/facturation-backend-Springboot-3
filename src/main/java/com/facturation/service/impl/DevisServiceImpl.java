@@ -504,7 +504,8 @@ public class DevisServiceImpl implements DevisService {
       Long idClient,
       LocalDate dateDebut,
       LocalDate dateFin) {
-    return null;
+    return devisRepository.findAllIds(
+        refDevis, minMontatnTTC, maxMontatnTTC, paymentStatus, idClient, dateDebut, dateFin);
   }
 
   @Override

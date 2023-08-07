@@ -44,6 +44,16 @@ public interface DevisApi {
   ResponseEntity<InputStreamResource> generatePdf(@RequestParam List<Long> ids)
       throws DocumentException, IOException;
 
+  @GetMapping(value = DEVIS_ENDPOINT + "/allIds", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<Long> findAllIds(
+      @RequestParam(required = false) String refDevis,
+      @RequestParam(required = false) Double minMontatnTTC,
+      @RequestParam(required = false) Double maxMontatnTTC,
+      @RequestParam(required = false) Boolean paymentStatus,
+      @RequestParam(required = false) Long idClient,
+      @RequestParam(required = false) LocalDate dateDebut,
+      @RequestParam(required = false) LocalDate dateFin);
+
   @PostMapping(
       value = DEVIS_ENDPOINT + "/statutupdate/{idDevis}",
       produces = MediaType.APPLICATION_JSON_VALUE)

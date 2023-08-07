@@ -71,6 +71,19 @@ public class DevisController implements DevisApi {
   }
 
   @Override
+  public List<Long> findAllIds(
+      String refDevis,
+      Double minMontatnTTC,
+      Double maxMontatnTTC,
+      Boolean paymentStatus,
+      Long idClient,
+      LocalDate dateDebut,
+      LocalDate dateFin) {
+    return devisService.findAllIds(
+        refDevis, minMontatnTTC, maxMontatnTTC, paymentStatus, idClient, dateDebut, dateFin);
+  }
+
+  @Override
   public ResponseEntity<Void> updateStatut(Long id) {
     return devisService.updateStatus(id);
   }
