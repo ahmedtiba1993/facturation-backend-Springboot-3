@@ -1,9 +1,21 @@
 package com.facturation.model.projection;
 
 public interface Statistique {
-    Double getMontatPaye();
-    Double getMontantNonPaye();
-    Integer getNbFacturePaye();
-    Integer getNbFactureNonPaye();
-    Integer getNbClient();
+  Double getMontantFacturePaye();
+
+  Double getMontantFactureNonPaye();
+
+  Long getNbFacturePaye();
+
+  Long getNbFactureNonPaye();
+
+  Double getMontantDevisPaye();
+
+  Double getMontantDevisNonPaye();
+
+  Long getNbDevisPaye();
+
+  Long getNbDevisNonPaye();
+
+  Long getNbClient();
 }

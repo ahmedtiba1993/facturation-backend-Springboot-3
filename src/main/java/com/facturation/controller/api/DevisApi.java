@@ -58,4 +58,9 @@ public interface DevisApi {
       value = DEVIS_ENDPOINT + "/statutupdate/{idDevis}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity<Void> updateStatut(@PathVariable("idDevis") Long id);
+
+  @DeleteMapping(
+      value = DEVIS_ENDPOINT + "/deleteDevis/{idDevis}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity<Void> deleteDevis(@PathVariable("idDevis") Long id);
 }

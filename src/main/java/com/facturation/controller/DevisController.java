@@ -87,4 +87,9 @@ public class DevisController implements DevisApi {
   public ResponseEntity<Void> updateStatut(Long id) {
     return devisService.updateStatus(id);
   }
+
+  @Override
+  public ResponseEntity<Void> deleteDevis(Long id) {
+    return devisService.deleteDevis(id);
+  }
 }

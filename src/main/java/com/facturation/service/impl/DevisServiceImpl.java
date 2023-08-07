@@ -41,31 +41,13 @@ import static com.facturation.utils.MontantEnLettres.convertirEnLettres;
 @Slf4j
 public class DevisServiceImpl implements DevisService {
 
-  private DevisRepository devisRepository;
-  private ClientRepository clientRepository;
-  private ProduitRepository produitRepository;
-  private LigneDevisRepository ligneDevisRepository;
-  private TimbreFiscalService timbreFiscalService;
-  private NumFactureRepository numFactureRepository;
-  private TvaRepository tvaRepository;
-
-  @Autowired
-  public DevisServiceImpl(
-      DevisRepository devisRepository,
-      ClientRepository clientRepository,
-      ProduitRepository produitRepository,
-      LigneDevisRepository ligneDevisRepository,
-      TimbreFiscalService timbreFiscalService,
-      NumFactureRepository numFactureRepository,
-      TvaRepository tvaRepository) {
-    this.devisRepository = devisRepository;
-    this.clientRepository = clientRepository;
-    this.produitRepository = produitRepository;
-    this.ligneDevisRepository = ligneDevisRepository;
-    this.timbreFiscalService = timbreFiscalService;
-    this.numFactureRepository = numFactureRepository;
-    this.tvaRepository = tvaRepository;
-  }
+  @Autowired private DevisRepository devisRepository;
+  @Autowired private ClientRepository clientRepository;
+  @Autowired private ProduitRepository produitRepository;
+  @Autowired private LigneDevisRepository ligneDevisRepository;
+  @Autowired private TimbreFiscalService timbreFiscalService;
+  @Autowired private NumFactureRepository numFactureRepository;
+  @Autowired private TvaRepository tvaRepository;
 
   @Override
   public DevisDto save(Devis devis) {
@@ -510,6 +492,11 @@ public class DevisServiceImpl implements DevisService {
 
   @Override
   public ResponseEntity<Void> deleteDevis(Long id) {
-    return null;
+    if (id == null) {
+      return null;
+    }
+    ligneDevisRepository.deleteByIdDevis(id);
+    devisRepository.deleteById(id);
+    return ResponseEntity.ok().build();
   }
 }
