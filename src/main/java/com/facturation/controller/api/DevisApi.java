@@ -3,6 +3,8 @@ package com.facturation.controller.api;
 import com.facturation.dto.DevisDto;
 import com.facturation.dto.FactureDto;
 import com.facturation.model.Devis;
+import com.facturation.model.projection.ClientRecapProjection;
+import com.facturation.model.projection.RecapClient;
 import com.itextpdf.text.DocumentException;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -14,8 +16,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
-import static com.facturation.utils.Constants.DEVIS_ENDPOINT;
-import static com.facturation.utils.Constants.FACTURE_ENDPOINT;
+import static com.facturation.utils.Constants.*;
 
 public interface DevisApi {
 
@@ -63,4 +64,8 @@ public interface DevisApi {
       value = DEVIS_ENDPOINT + "/deleteDevis/{idDevis}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity<Void> deleteDevis(@PathVariable("idDevis") Long id);
+
+  @GetMapping(value = DEVIS_ENDPOINT + "/recapClient", produces = MediaType.APPLICATION_JSON_VALUE)
+  Page<ClientRecapProjection> getRecapClient(
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size);
 }

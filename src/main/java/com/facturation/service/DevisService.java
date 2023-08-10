@@ -2,6 +2,8 @@ package com.facturation.service;
 
 import com.facturation.dto.DevisDto;
 import com.facturation.model.Devis;
+import com.facturation.model.projection.ClientRecapProjection;
+import com.facturation.model.projection.RecapClient;
 import com.itextpdf.text.DocumentException;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -46,4 +48,6 @@ public interface DevisService {
       LocalDate dateFin);
 
   ResponseEntity<Void> deleteDevis(Long id);
+
+  Page<ClientRecapProjection> getRecapClient(Pageable pageable);
 }

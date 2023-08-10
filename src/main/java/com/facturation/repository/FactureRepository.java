@@ -95,7 +95,7 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
               + "(select count(*) FROM facturation.devis where facturation.devis.payment_status = 1) as nbDevisPaye,"
               + "(select count(*) FROM facturation.devis where facturation.devis.payment_status = 0) as nbDevisNonPaye,"
               + "(select count(*) FROM facturation.devis where facturation.devis.payment_status = 0) as nbDevisNonPaye,"
-              + "(select count(*) FROM facturation.facture) as nbClient",
+              + "(select count(*) FROM facturation.client) as nbClient",
       nativeQuery = true)
   Statistique getStatistique();
 

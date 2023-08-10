@@ -3,6 +3,7 @@ package com.facturation.controller;
 import com.facturation.controller.api.DevisApi;
 import com.facturation.dto.DevisDto;
 import com.facturation.model.Devis;
+import com.facturation.model.projection.ClientRecapProjection;
 import com.facturation.service.DevisService;
 import com.itextpdf.text.DocumentException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,5 +92,11 @@ public class DevisController implements DevisApi {
   @Override
   public ResponseEntity<Void> deleteDevis(Long id) {
     return devisService.deleteDevis(id);
+  }
+
+  @Override
+  public Page<ClientRecapProjection> getRecapClient(int page, int size) {
+    Pageable pageable = PageRequest.of(page, size);
+    return devisService.getRecapClient(pageable);
   }
 }

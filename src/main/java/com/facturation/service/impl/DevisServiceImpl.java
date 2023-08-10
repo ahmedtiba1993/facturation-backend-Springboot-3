@@ -6,6 +6,7 @@ import com.facturation.exception.EntityNotFoundException;
 import com.facturation.exception.ErrorCodes;
 import com.facturation.exception.InvalidEntityException;
 import com.facturation.model.*;
+import com.facturation.model.projection.ClientRecapProjection;
 import com.facturation.repository.*;
 import com.facturation.service.DevisService;
 import com.facturation.service.TimbreFiscalService;
@@ -498,5 +499,10 @@ public class DevisServiceImpl implements DevisService {
     ligneDevisRepository.deleteByIdDevis(id);
     devisRepository.deleteById(id);
     return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public Page<ClientRecapProjection> getRecapClient(Pageable pageable) {
+    return devisRepository.getRecapClient(pageable);
   }
 }

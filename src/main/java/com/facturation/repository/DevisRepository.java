@@ -3,6 +3,8 @@ package com.facturation.repository;
 import com.facturation.dto.DevisDto;
 import com.facturation.model.Devis;
 import com.facturation.model.Facture;
+import com.facturation.model.projection.ClientRecapProjection;
+import com.facturation.model.projection.RecapClient;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -86,4 +88,19 @@ public interface DevisRepository extends JpaRepository<Devis, Long> {
       Long idClient,
       LocalDate dateDebut,
       LocalDate dateFin);
+
+  @Query(
+      value =
+          "SELECT distinct facturation.client.id AS idClient, "
+              + "facturation.client.nom AS nomClient, "
+              + "facturation.client.prenom AS prenomClient, "
+              + "facturation.client.nom_commercial AS nomCommercial, "
+              + "(SELECT COUNT(*) FROM facturation.devis WHERE facturation.devis.client_id = facturation.client.id) AS numFacture, "
+              + "(SELECT sum(montantttc) FROM facturation.devis WHERE devis.payment_status = 0 AND devis.client_id = facturation.client.id) AS nmontantNonPaye, "
+              + "(SELECT sum(montantttc) FROM facturation.devis WHERE devis.payment_status = 1 AND devis.client_id = facturation.client.id) AS nmontantPaye "
+              + "FROM facturation.client "
+              + "LEFT JOIN facturation.devis ON facturation.client.id = facturation.devis.client_id",
+      countQuery = "SELECT count(*) FROM facturation.client",
+      nativeQuery = true)
+  Page<ClientRecapProjection> getRecapClient(Pageable pageable);
 }
