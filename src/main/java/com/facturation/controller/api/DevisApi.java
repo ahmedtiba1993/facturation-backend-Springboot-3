@@ -65,6 +65,11 @@ public interface DevisApi {
       produces = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity<Void> deleteDevis(@PathVariable("idDevis") Long id);
 
+  @PostMapping(
+      value = DEVIS_ENDPOINT + "/convertDevisToFacture/{idDevis}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity<Void> convertDevisToFacture(@PathVariable("idDevis") Long id);
+
   @GetMapping(value = DEVIS_ENDPOINT + "/recapClient", produces = MediaType.APPLICATION_JSON_VALUE)
   Page<ClientRecapProjection> getRecapClient(
       @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size);

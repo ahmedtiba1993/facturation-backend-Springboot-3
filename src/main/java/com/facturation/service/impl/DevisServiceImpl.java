@@ -49,6 +49,8 @@ public class DevisServiceImpl implements DevisService {
   @Autowired private TimbreFiscalService timbreFiscalService;
   @Autowired private NumFactureRepository numFactureRepository;
   @Autowired private TvaRepository tvaRepository;
+  @Autowired private FactureRepository factureRepository;
+  @Autowired private LigneFactureRepository ligneFactureRepository;
 
   @Override
   public DevisDto save(Devis devis) {
@@ -504,5 +506,52 @@ public class DevisServiceImpl implements DevisService {
   @Override
   public Page<ClientRecapProjection> getRecapClient(Pageable pageable) {
     return devisRepository.getRecapClient(pageable);
+  }
+
+  @Override
+  public ResponseEntity<Void> createFactureFromDevis(Long id) {
+
+    DevisDto devisDto = findById(id);
+    Devis devis = DevisDto.toEntity(devisDto);
+    System.out.println("aaa : " + devis);
+    Facture facture = new Facture();
+
+    // Copie des informations générales
+    facture.setDateFacture(devis.getDateDevis());
+    facture.setTauxTVA(devis.getTauxTVA());
+    facture.setMontantHt(devis.getMontantHt());
+    facture.setMontantTTC(devis.getMontantTTC());
+    facture.setTimbreFiscale(devis.getTimbreFiscale());
+    facture.setPaymentStatus(devis.getPaymentStatus());
+    facture.setClient(devis.getClient());
+    facture.setReference(generateReferenceFacture());
+    factureRepository.save(facture);
+
+    // Copie des lignes de devis en lignes de facture
+    List<LigneFacture> ligneFacturesList = new ArrayList<>();
+    List<LigneDevis> lDevis = ligneDevisRepository.findByDevisId(devis.getId());
+    for (LigneDevis ligneDevis : lDevis) {
+      LigneFacture ligneFacture = new LigneFacture();
+      ligneFacture.setProduit(ligneDevis.getProduit()); // Par exemple
+      ligneFacture.setQuantite(ligneDevis.getQuantite()); // Par exemple
+      ligneFacture.setPrixUnitaire(ligneDevis.getPrixUnitaire()); // Par exemple
+      // Calcul du prix total en fonction de la quantité, du prix unitaire et de la remise
+      ligneFacture.setPrixTotal(ligneDevis.getPrixTotal()); // À implémenter
+      ligneFacture.setFacture(facture);
+      ligneFactureRepository.save(ligneFacture);
+    }
+
+    return ResponseEntity.ok().build();
+  }
+
+  public String generateReferenceFacture() {
+    LocalDate today = LocalDate.now();
+    int year = today.getYear();
+
+    DecimalFormat decimalFormat = new DecimalFormat("000");
+    Integer numFacture = numFactureRepository.getNumFacture();
+    String nombreDeFacturesFormatte = decimalFormat.format(numFacture + 1);
+    numFactureRepository.updateNumFacture(numFacture + 1);
+    return nombreDeFacturesFormatte + "-" + year;
   }
 }

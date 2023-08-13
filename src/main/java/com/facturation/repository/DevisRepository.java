@@ -103,4 +103,7 @@ public interface DevisRepository extends JpaRepository<Devis, Long> {
       countQuery = "SELECT count(*) FROM facturation.client",
       nativeQuery = true)
   Page<ClientRecapProjection> getRecapClient(Pageable pageable);
+
+  @Query("SELECT d from Devis d where d.id = :id")
+  Devis selectById(Long id);
 }

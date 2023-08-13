@@ -50,4 +50,6 @@ public interface DevisService {
   ResponseEntity<Void> deleteDevis(Long id);
 
   Page<ClientRecapProjection> getRecapClient(Pageable pageable);
+
+  ResponseEntity<Void> createFactureFromDevis(Long id);
 }

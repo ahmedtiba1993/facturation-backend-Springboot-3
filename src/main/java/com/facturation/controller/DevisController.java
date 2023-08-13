@@ -95,6 +95,11 @@ public class DevisController implements DevisApi {
   }
 
   @Override
+  public ResponseEntity<Void> convertDevisToFacture(Long id) {
+    return devisService.createFactureFromDevis(id);
+  }
+
+  @Override
   public Page<ClientRecapProjection> getRecapClient(int page, int size) {
     Pageable pageable = PageRequest.of(page, size);
     return devisService.getRecapClient(pageable);
