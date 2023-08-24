@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 public interface FactureService {
@@ -52,4 +51,9 @@ public interface FactureService {
       LocalDate dateFin);
 
   ResponseEntity<Void> deleteFacture(Long id);
+
+  ResponseEntity<Void> deleteLingeFacture(Long factureId, Long ligneFactureId);
+
+  ResponseEntity<Void> ajouterLingeFacture(
+      Long factureId, Long idProduit, double prix, Integer quatite, Integer remise);
 }

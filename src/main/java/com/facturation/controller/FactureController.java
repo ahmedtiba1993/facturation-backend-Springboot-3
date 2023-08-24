@@ -116,4 +116,15 @@ public class FactureController implements FactureApi {
   public ResponseEntity<Void> deleteFacture(Long id) {
     return factureService.deleteFacture(id);
   }
+
+  @Override
+  public ResponseEntity<Void> deleteLigneFacture(Long idFacture, Long idLigneFacture) {
+    return factureService.deleteLingeFacture(idFacture, idLigneFacture);
+  }
+
+  @Override
+  public ResponseEntity<Void> ajouterLigneFacture(
+      Long factureId, Long idProduit, Double prix, Integer quantite, Integer remise) {
+    return factureService.ajouterLingeFacture(factureId, idProduit, prix, quantite, remise);
+  }
 }

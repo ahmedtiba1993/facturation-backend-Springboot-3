@@ -79,4 +79,23 @@ public interface FactureApi {
       value = FACTURE_ENDPOINT + "/deleteFacture/{idFacture}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity<Void> deleteFacture(@PathVariable("idFacture") Long id);
+
+  @DeleteMapping(
+      value = FACTURE_ENDPOINT + "/deleteLigneFacture/{idFacture}/{idLigneFacture}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity<Void> deleteLigneFacture(
+      @PathVariable("idFacture") Long idFacture,
+      @PathVariable("idLigneFacture") Long idLigneFacture);
+
+  @PostMapping(
+      value =
+          FACTURE_ENDPOINT
+              + "/ajouterLigneFacture/{factureId}/{idProduit}/{prix}/{quantite}/{remise}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity<Void> ajouterLigneFacture(
+      @PathVariable("factureId") Long factureId,
+      @PathVariable("idProduit") Long idProduit,
+      @PathVariable("prix") Double prix,
+      @PathVariable("quantite") Integer quantite,
+      @PathVariable("remise") Integer remise);
 }

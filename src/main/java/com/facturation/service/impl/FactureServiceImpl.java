@@ -535,4 +535,54 @@ public class FactureServiceImpl implements FactureService {
     factureRepository.deleteById(id);
     return ResponseEntity.ok().build();
   }
+
+  @Override
+  public ResponseEntity<Void> deleteLingeFacture(Long factureId, Long ligneFactureId) {
+    FactureDto factureDto = findById(factureId);
+    LigneFacture ligneFacture = ligneFactureRepository.findById(ligneFactureId).get();
+
+    double timbre = timbreFiscalService.getTimbreFiscale().getMontant();
+
+    Double montantHt = factureDto.getMontantHt();
+    Double montantTTC = factureDto.getMontantTTC();
+
+    montantHt -= ligneFacture.getPrixTotal();
+    montantTTC = montantHt + (montantHt * 0.19) + (timbre / 1000);
+
+    factureRepository.updateMontant(factureId, montantHt, montantTTC);
+
+    this.ligneFactureRepository.deleteById(ligneFactureId);
+
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> ajouterLingeFacture(
+      Long factureId, Long idProduit, double prix, Integer quatite, Integer remise) {
+
+    FactureDto factureDto = findById(factureId);
+    Produit produit = produitRepository.findById(idProduit).get();
+
+    LigneFacture ligneFacture = new LigneFacture();
+    ligneFacture.setProduit(produit);
+    ligneFacture.setRemise(remise);
+    ligneFacture.setPrixUnitaire(prix * quatite);
+    ligneFacture.setQuantite(quatite);
+    ligneFacture.setPrixTotal((quatite * prix) - ((quatite * prix) * (remise / 100.0)));
+
+    Facture f = new Facture();
+    f.setId(factureDto.getId());
+    ligneFacture.setFacture(f);
+    ligneFactureRepository.save(ligneFacture);
+
+    Double prixProduit = (quatite * prix) - ((quatite * prix) * (remise / 100.0));
+    double timbre = timbreFiscalService.getTimbreFiscale().getMontant();
+
+    Double montantHt = factureDto.getMontantHt() + prixProduit;
+    Double montantTTC = montantHt + (montantHt * 0.19) + (timbre / 1000);
+
+    factureRepository.updateMontant(factureId, montantHt, montantTTC);
+
+    return ResponseEntity.ok().build();
+  }
 }

@@ -117,4 +117,10 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
 
   @Query("select fact from Facture fact where fact.id IN  :ids")
   List<Facture> findFactureToPdf(List<Long> ids);
+
+  @Modifying
+  @Transactional
+  @Query(
+      "UPDATE Facture f SET f.montantHt = :montantHt,f.montantTTC = :montantTTC WHERE f.id = :id")
+  void updateMontant(Long id, Double montantHt, Double montantTTC);
 }
