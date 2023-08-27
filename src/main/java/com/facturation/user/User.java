@@ -24,10 +24,14 @@ public class User implements UserDetails, Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
+
   private String firstname;
   private String lastname;
   private String email;
   private String password;
+  private Integer tel;
+  private Integer fax;
+  private Integer mobile;
 
   @Enumerated(EnumType.STRING)
   private Role role;

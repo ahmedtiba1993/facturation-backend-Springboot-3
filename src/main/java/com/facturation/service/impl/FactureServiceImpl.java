@@ -2,6 +2,7 @@ package com.facturation.service.impl;
 
 import com.facturation.dto.FactureDto;
 import com.facturation.dto.LigneFactureDto;
+import com.facturation.dto.UserDto;
 import com.facturation.exception.EntityNotFoundException;
 import com.facturation.exception.ErrorCodes;
 import com.facturation.exception.InvalidEntityException;
@@ -14,6 +15,8 @@ import com.facturation.model.projection.Statistique;
 import com.facturation.repository.*;
 import com.facturation.service.FactureService;
 import com.facturation.service.TimbreFiscalService;
+import com.facturation.user.User;
+import com.facturation.user.UserRepository;
 import com.facturation.validator.FactureValidator;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
@@ -28,6 +31,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -46,32 +52,21 @@ import static com.facturation.utils.MontantEnLettres.convertirEnLettres;
 @Slf4j
 public class FactureServiceImpl implements FactureService {
 
-  private FactureRepository factureRepository;
-  private ClientRepository clientRepository;
-  private ProduitRepository produitRepository;
-  private LigneFactureRepository ligneFactureRepository;
-  private TimbreFiscalService timbreFiscalService;
-  private NumFactureRepository numFactureRepository;
+  @Autowired private FactureRepository factureRepository;
 
-  private TvaRepository tvaRepository;
+  @Autowired private ClientRepository clientRepository;
 
-  @Autowired
-  public FactureServiceImpl(
-      FactureRepository factureRepository,
-      ClientRepository clientRepository,
-      ProduitRepository produitRepository,
-      LigneFactureRepository ligneFactureRepository,
-      TimbreFiscalService timbreFiscalService,
-      NumFactureRepository numFactureRepository,
-      TvaRepository tvaRepository) {
-    this.factureRepository = factureRepository;
-    this.clientRepository = clientRepository;
-    this.produitRepository = produitRepository;
-    this.ligneFactureRepository = ligneFactureRepository;
-    this.timbreFiscalService = timbreFiscalService;
-    this.numFactureRepository = numFactureRepository;
-    this.tvaRepository = tvaRepository;
-  }
+  @Autowired private ProduitRepository produitRepository;
+
+  @Autowired private LigneFactureRepository ligneFactureRepository;
+
+  @Autowired private TimbreFiscalService timbreFiscalService;
+
+  @Autowired private NumFactureRepository numFactureRepository;
+
+  @Autowired private TvaRepository tvaRepository;
+
+  @Autowired private UserRepository userRepository;
 
   @Override
   public FactureDto save(FactureDto dto) {
@@ -203,6 +198,13 @@ public class FactureServiceImpl implements FactureService {
     Document document = new Document();
     PdfWriter.getInstance(document, outputStream);
 
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    User user = new User();
+    if (authentication != null && authentication.isAuthenticated()) {
+      // Vous pouvez maintenant accéder aux informations de l'utilisateur
+      user = (User) authentication.getPrincipal();
+    }
+
     document.open();
     List<Facture> factureList = factureRepository.findFactureToPdf(ids);
 
@@ -272,13 +274,38 @@ public class FactureServiceImpl implements FactureService {
       celltableHeader1.setBorder(Rectangle.NO_BORDER);
       tableHeader.addCell(celltableHeader1);
 
+      String millions = user.getTel().toString().substring(0, 1);
+      String centMille = user.getTel().toString().substring(1, 4);
+      String mille = user.getTel().toString().substring(4);
+
       // deuxième colonne : informations du client
       PdfPCell celltableHeader2 = new PdfPCell();
-      Paragraph p6 = new Paragraph("Téléphone: 73 467 940");
+      Paragraph p6 =
+          new Paragraph(
+              "Téléphone: "
+                  + user.getTel().toString().substring(0, 2)
+                  + " "
+                  + user.getTel().toString().substring(2, 4)
+                  + " "
+                  + user.getTel().toString().substring(4));
       p6.setLeading(0, 1.5f);
-      Paragraph p7 = new Paragraph("Fax: 73 467 940");
+      Paragraph p7 =
+          new Paragraph(
+              "Fax: "
+                  + user.getFax().toString().substring(0, 2)
+                  + " "
+                  + user.getFax().toString().substring(2, 4)
+                  + " "
+                  + user.getFax().toString().substring(4));
       p7.setLeading(0, 1.5f);
-      Paragraph p8 = new Paragraph("Mobile: 97 366 747");
+      Paragraph p8 =
+          new Paragraph(
+              "Mobile: "
+                  + user.getMobile().toString().substring(0, 2)
+                  + " "
+                  + user.getMobile().toString().substring(2, 4)
+                  + " "
+                  + user.getMobile().toString().substring(4));
       p8.setLeading(0, 1.5f);
       celltableHeader2.addElement(p6);
       celltableHeader2.addElement(p7);
