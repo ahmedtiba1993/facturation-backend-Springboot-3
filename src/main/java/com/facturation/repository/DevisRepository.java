@@ -106,4 +106,9 @@ public interface DevisRepository extends JpaRepository<Devis, Long> {
 
   @Query("SELECT d from Devis d where d.id = :id")
   Devis selectById(Long id);
+
+  @Modifying
+  @Transactional
+  @Query("UPDATE Devis d SET d.montantHt = :montantHt,d.montantTTC = :montantTTC WHERE d.id = :id")
+  void updateMontant(Long id, Double montantHt, Double montantTTC);
 }

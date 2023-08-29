@@ -52,4 +52,9 @@ public interface DevisService {
   Page<ClientRecapProjection> getRecapClient(Pageable pageable);
 
   ResponseEntity<Void> createFactureFromDevis(Long id);
+
+  ResponseEntity<Void> deleteLingeDevis(Long devisId, Long ligneDevisId);
+
+  ResponseEntity<Void> ajouterLingeDevis(
+      Long devisId, Long idProduit, double prix, Integer quatite, Integer remise);
 }

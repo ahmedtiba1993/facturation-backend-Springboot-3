@@ -73,4 +73,21 @@ public interface DevisApi {
   @GetMapping(value = DEVIS_ENDPOINT + "/recapClient", produces = MediaType.APPLICATION_JSON_VALUE)
   Page<ClientRecapProjection> getRecapClient(
       @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size);
+
+  @DeleteMapping(
+      value = DEVIS_ENDPOINT + "/deleteLignedevis/{idDevis}/{idLigneDevis}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity<Void> deleteLignedevis(
+      @PathVariable("idDevis") Long idDevis, @PathVariable("idLigneDevis") Long idLigneDevis);
+
+  @PostMapping(
+      value =
+          DEVIS_ENDPOINT + "/ajouterLigneDevis/{idDevis}/{idProduit}/{prix}/{quantite}/{remise}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity<Void> ajouterLigneDevis(
+      @PathVariable("idDevis") Long factureId,
+      @PathVariable("idProduit") Long idProduit,
+      @PathVariable("prix") Double prix,
+      @PathVariable("quantite") Integer quantite,
+      @PathVariable("remise") Integer remise);
 }

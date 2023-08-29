@@ -544,6 +544,56 @@ public class DevisServiceImpl implements DevisService {
     return ResponseEntity.ok().build();
   }
 
+  @Override
+  public ResponseEntity<Void> deleteLingeDevis(Long devisId, Long ligneDevisId) {
+    DevisDto devisDto = findById(devisId);
+    LigneDevis ligneDevis = ligneDevisRepository.findById(ligneDevisId).get();
+
+    double timbre = timbreFiscalService.getTimbreFiscale().getMontant();
+
+    Double montantHt = devisDto.getMontantHt();
+    Double montantTTC = devisDto.getMontantTTC();
+
+    montantHt -= ligneDevis.getPrixTotal();
+    montantTTC = montantHt + (montantHt * 0.19) + (timbre / 1000);
+
+    devisRepository.updateMontant(devisId, montantHt, montantTTC);
+
+    this.ligneDevisRepository.deleteById(ligneDevisId);
+
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> ajouterLingeDevis(
+      Long devisId, Long idProduit, double prix, Integer quatite, Integer remise) {
+
+    DevisDto devisDto = findById(devisId);
+    Produit produit = produitRepository.findById(idProduit).get();
+
+    LigneDevis ligneDevis = new LigneDevis();
+    ligneDevis.setProduit(produit);
+    ligneDevis.setRemise(remise);
+    ligneDevis.setPrixUnitaire(prix * quatite);
+    ligneDevis.setQuantite(quatite);
+    ligneDevis.setPrixTotal((quatite * prix) - ((quatite * prix) * (remise / 100.0)));
+
+    Devis d = new Devis();
+    d.setId(devisDto.getId());
+    ligneDevis.setDevis(d);
+    ligneDevisRepository.save(ligneDevis);
+
+    Double prixProduit = (quatite * prix) - ((quatite * prix) * (remise / 100.0));
+    double timbre = timbreFiscalService.getTimbreFiscale().getMontant();
+
+    Double montantHt = devisDto.getMontantHt() + prixProduit;
+    Double montantTTC = montantHt + (montantHt * 0.19) + (timbre / 1000);
+
+    devisRepository.updateMontant(devisId, montantHt, montantTTC);
+
+    return ResponseEntity.ok().build();
+  }
+
   public String generateReferenceFacture() {
     LocalDate today = LocalDate.now();
     int year = today.getYear();

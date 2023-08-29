@@ -104,4 +104,15 @@ public class DevisController implements DevisApi {
     Pageable pageable = PageRequest.of(page, size);
     return devisService.getRecapClient(pageable);
   }
+
+  @Override
+  public ResponseEntity<Void> deleteLignedevis(Long idDevis, Long idLigneDevis) {
+    return devisService.deleteLingeDevis(idDevis, idLigneDevis);
+  }
+
+  @Override
+  public ResponseEntity<Void> ajouterLigneDevis(
+      Long factureId, Long idProduit, Double prix, Integer quantite, Integer remise) {
+    return devisService.ajouterLingeDevis(factureId, idProduit, prix, quantite, remise);
+  }
 }
