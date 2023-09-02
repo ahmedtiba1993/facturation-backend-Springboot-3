@@ -27,73 +27,74 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CategorieServiceImpl implements CategorieService {
 
-    private final CategorieRepository categorieRepository;
-    private final ProduitRepository produitRepository;
+  private final CategorieRepository categorieRepository;
+  private final ProduitRepository produitRepository;
 
-    @Autowired
-    public CategorieServiceImpl(CategorieRepository categorieRepository, ProduitRepository produitRepository) {
-        this.categorieRepository = categorieRepository;
-        this.produitRepository = produitRepository;
+  @Autowired
+  public CategorieServiceImpl(
+      CategorieRepository categorieRepository, ProduitRepository produitRepository) {
+    this.categorieRepository = categorieRepository;
+    this.produitRepository = produitRepository;
+  }
+
+  @Override
+  public CategorieDto save(CategorieDto dto) {
+    List<String> errors = CategorieValidator.validate(dto);
+
+    if (!errors.isEmpty()) {
+      log.error("Categorie is not valid {} ", dto);
+      throw new InvalidEntityException(
+          "Catégorie n est pas valide", ErrorCodes.CATEGORIE_NOT_VALID, errors);
     }
 
-    @Override
-    public CategorieDto save(CategorieDto dto) {
-        List<String> errors = CategorieValidator.validate(dto);
-
-        if (!errors.isEmpty()) {
-            log.error("Categorie is not valid {} ",dto);
-            throw new InvalidEntityException("Catégorie n est pas valide", ErrorCodes.CATEGORIE_NOT_VALID, errors);
-        }
-
-        if (categorieRepository.findByNom(dto.getNom()).isPresent()) {
-            errors.add("La catégorie " + dto.getNom() + " existe déjà.");
-            throw new InvalidEntityException("La catégorie " + dto.getNom() + " existe déjà.", ErrorCodes.CATEGORIE_NOT_VALID, errors);
-        }
-
-        log.info("Add Category{} ",dto);
-        return CategorieDto.fromEntity(categorieRepository.save(CategorieDto.toEntity(dto)));
+    if (categorieRepository.findByNom(dto.getNom()).isPresent()) {
+      errors.add("La catégorie " + dto.getNom() + " existe déjà.");
+      throw new InvalidEntityException(
+          "La catégorie " + dto.getNom() + " existe déjà.", ErrorCodes.CATEGORIE_NOT_VALID, errors);
     }
 
-    @Override
-    public CategorieDto findById(Long id) {
-        if (id == null) {
-            return null;
-        }
+    log.info("Add Category{} ", dto);
+    return CategorieDto.fromEntity(categorieRepository.save(CategorieDto.toEntity(dto)));
+  }
 
-        Optional<Categorie> categories = categorieRepository.findById(id);
-        CategorieDto dto = categories.map(CategorieDto::fromEntity).orElse(null);
-
-        if (dto == null) {
-            throw new EntityNotFoundException("Aucune catégorie trouvée dans la base de données",
-                    ErrorCodes.CATEGORIE_NOT_FOUND);
-        }
-
-        return dto;
+  @Override
+  public CategorieDto findById(Long id) {
+    if (id == null) {
+      return null;
     }
 
-    @Override
-    public Page<CategorieDto> findAllPaginated(Pageable pageable) {
-        Page<Categorie> categories = categorieRepository.findAll(pageable);
-        Function<Categorie, CategorieDto> converter = CategorieDto::fromEntity;
-        Page<CategorieDto> categorieDtosPage = categories.map(converter);
-        return categorieDtosPage;
+    Optional<Categorie> categories = categorieRepository.findById(id);
+    CategorieDto dto = categories.map(CategorieDto::fromEntity).orElse(null);
+
+    if (dto == null) {
+      throw new EntityNotFoundException(
+          "Aucune catégorie trouvée dans la base de données", ErrorCodes.CATEGORIE_NOT_FOUND);
     }
 
-    @Override
-    public void delete(Long id) {
-        if (id == null) {
-            return;
-        }
-        if (produitRepository.countByCategorieId(id) > 0) {
-            throw new OperationNotAllowedException("La catégorie contient des produits, elle ne peut pas être supprimée");
-        }
-        categorieRepository.deleteById(id);
-    }
+    return dto;
+  }
 
-    @Override
-    public List<CategorieDto> findAll() {
-        return categorieRepository.findAll().stream()
-                .map(CategorieDto::fromEntity)
-                .collect(Collectors.toList());
+  @Override
+  public Page<CategorieDto> findAllPaginated(Pageable pageable) {
+    Page<CategorieDto> categories = categorieRepository.findAllCategoriesAsDto(pageable);
+    return categories;
+  }
+
+  @Override
+  public void delete(Long id) {
+    if (id == null) {
+      return;
     }
+    if (produitRepository.countByCategorieId(id) > 0) {
+      throw new OperationNotAllowedException(
+          "La catégorie contient des produits, elle ne peut pas être supprimée");
+    }
+    categorieRepository.deleteById(id);
+  }
+
+  @Override
+  public List<CategorieDto> findAll() {
+    List<CategorieDto> categories = categorieRepository.findAllCategoriesAsDto();
+    return categories;
+  }
 }
