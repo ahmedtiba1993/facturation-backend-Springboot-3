@@ -22,4 +22,9 @@ public interface NumFactureApi {
       value = NUM_FACTURE_ENDPOINT + "/updateNumFacture",
       produces = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity<HashMap<String, Object>> updateNumFacture(@RequestParam Integer numFacture);
+
+  @GetMapping(
+      value = NUM_FACTURE_ENDPOINT + "/updateNumDevis",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity<HashMap<String, Object>> updateNumDevis(@RequestParam Integer numDevis);
 }

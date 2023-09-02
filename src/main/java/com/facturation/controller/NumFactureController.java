@@ -28,4 +28,9 @@ public class NumFactureController implements NumFactureApi {
   public ResponseEntity<HashMap<String, Object>> updateNumFacture(Integer numFacture) {
     return this.numFactureService.updateNumFacture(numFacture);
   }
+
+  @Override
+  public ResponseEntity<HashMap<String, Object>> updateNumDevis(Integer numDevis) {
+    return this.numFactureService.updateNumDevis(numDevis);
+  }
 }

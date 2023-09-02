@@ -9,5 +9,7 @@ public interface NumFactureService {
 
   ResponseEntity<HashMap<String, Object>> updateNumFacture(Integer numFacture);
 
+  ResponseEntity<HashMap<String, Object>> updateNumDevis(Integer numDevis);
+
   NumFacture getNumFacture();
 }

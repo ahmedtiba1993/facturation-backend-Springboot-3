@@ -42,6 +42,24 @@ public class numFactureServiceImpl implements NumFactureService {
   }
 
   @Override
+  public ResponseEntity<HashMap<String, Object>> updateNumDevis(Integer numDevis) {
+    ResponseEntity<HashMap<String, Object>> response = null;
+    HashMap<String, Object> dataRespenseObject = new HashMap<String, Object>();
+
+    if (numDevis <= 0) {
+      dataRespenseObject.put("success", false);
+      response = new ResponseEntity<HashMap<String, Object>>(dataRespenseObject, HttpStatus.OK);
+      return response;
+    }
+
+    numFactureRepository.updateNumDevis(numDevis);
+
+    dataRespenseObject.put("success", true);
+    response = new ResponseEntity<HashMap<String, Object>>(dataRespenseObject, HttpStatus.OK);
+    return response;
+  }
+
+  @Override
   public NumFacture getNumFacture() {
     return numFactureRepository.getNumberFacture();
   }
