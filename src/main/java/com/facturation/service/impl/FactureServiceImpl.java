@@ -115,8 +115,8 @@ public class FactureServiceImpl implements FactureService {
     if (dto.getLignesFacture() != null) {
       for (LigneFactureDto ligneFact : dto.getLignesFacture()) {
         int remise = ligneFact.getRemise();
-        double montantProduit = ligneFact.getProduit().getPrix() * ligneFact.getQuantite();
-        if (ligneFact.getProduit().getEtatRemise() == true) {
+        double montantProduit = ligneFact.getPrixUnitaire() * ligneFact.getQuantite();
+        if (ligneFact.getRemise() > 0) {
           montantTotalProduit =
               montantTotalProduit + (montantProduit - (montantProduit * (remise / 100.0)));
         } else {
@@ -124,7 +124,7 @@ public class FactureServiceImpl implements FactureService {
         }
         LigneFacture ligneFacture = LigneFactureDto.toEntity(ligneFact);
         ligneFacture.setFacture(saveFacture);
-        ligneFacture.setPrixUnitaire(ligneFact.getProduit().getPrix());
+        ligneFacture.setPrixUnitaire(ligneFact.getPrixUnitaire());
         ligneFacture.setRemise(remise);
         ligneFacture.setPrixTotal((montantProduit - (montantProduit * (remise / 100.0))));
         ligneFactureRepository.save(ligneFacture);
@@ -403,26 +403,40 @@ public class FactureServiceImpl implements FactureService {
       DecimalFormat df = new DecimalFormat("#0.000");
       // Ajout des produits
       for (LigneFacture l : facutre.getLignesFacture()) {
+        int padding = 7;
 
-        tableFacture
-            .addCell(new PdfPCell(new Phrase(l.getProduit().getCode())))
-            .setHorizontalAlignment(Element.ALIGN_CENTER);
-        tableFacture
-            .addCell(new PdfPCell(new Phrase(l.getProduit().getDescription())))
-            .setHorizontalAlignment(Element.ALIGN_CENTER);
-        tableFacture
-            .addCell(new PdfPCell(new Phrase(String.valueOf(l.getQuantite()))))
-            .setHorizontalAlignment(Element.ALIGN_CENTER);
-        tableFacture
-            .addCell(
-                new PdfPCell(new Phrase(String.valueOf(df.format(l.getPrixUnitaire()) + " TND"))))
-            .setHorizontalAlignment(Element.ALIGN_CENTER);
-        tableFacture
-            .addCell(new PdfPCell(new Phrase(String.valueOf(l.getRemise()) + "%")))
-            .setHorizontalAlignment(Element.ALIGN_CENTER);
-        tableFacture
-            .addCell(new PdfPCell(new Phrase(df.format(l.getPrixTotal()) + " TND")))
-            .setHorizontalAlignment(Element.ALIGN_CENTER);
+        PdfPCell cell = new PdfPCell(new Phrase(l.getProduit().getCode()));
+        cell.setPadding(padding);
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        tableFacture.addCell(cell);
+
+        PdfPCell cell2 = new PdfPCell(new Phrase(l.getProduit().getDescription()));
+        cell2.setPadding(padding);
+        cell2.setHorizontalAlignment(Element.ALIGN_CENTER);
+        tableFacture.addCell(cell2);
+
+        PdfPCell cell3 = new PdfPCell(new Phrase(String.valueOf(l.getQuantite())));
+        cell3.setPadding(padding);
+        cell3.setHorizontalAlignment(Element.ALIGN_CENTER);
+        tableFacture.addCell(cell3);
+
+        PdfPCell cell4 =
+            new PdfPCell(new Phrase(String.valueOf(df.format(l.getPrixUnitaire()) + " TND")));
+        cell4.setPadding(padding);
+        cell4.setHorizontalAlignment(Element.ALIGN_CENTER);
+        tableFacture.addCell(cell4);
+
+        PdfPCell cell5 =
+            new PdfPCell(new PdfPCell(new Phrase(String.valueOf(l.getRemise()) + "%")));
+        cell5.setPadding(padding);
+        cell5.setHorizontalAlignment(Element.ALIGN_CENTER);
+        tableFacture.addCell(cell5);
+
+        PdfPCell cell6 =
+            new PdfPCell(new PdfPCell(new Phrase(df.format(l.getPrixTotal()) + " TND")));
+        cell6.setPadding(padding);
+        cell6.setHorizontalAlignment(Element.ALIGN_CENTER);
+        tableFacture.addCell(cell6);
       }
 
       // Ajout du tableau au document

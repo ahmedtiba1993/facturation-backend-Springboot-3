@@ -1,5 +1,6 @@
 package com.facturation.repository;
 
+import com.facturation.dto.FactureDto;
 import com.facturation.model.Facture;
 import com.facturation.model.projection.RecapClient;
 import com.facturation.model.projection.Statistique;
@@ -87,7 +88,7 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
           "SELECT"
               + "(select sum(facturation.facture.montantttc) FROM facturation.facture where facturation.facture.payment_status = 1) as montantFacturePaye,"
               + "(select sum(facturation.facture.montantttc) FROM facturation.facture where facturation.facture.payment_status = 0) as montantFactureNonPaye,"
-              + "(select count(*) FROM facturation.facture where facturation.facture.payment_status = 1) as nbFacturePaye,"
+              + "(select count(*) FROM facturation.facture where facturation.facture.payment_status = 1 ) as nbFacturePaye,"
               + "(select count(*) FROM facturation.facture where facturation.facture.payment_status = 0) as nbFactureNonPaye,"
               + "(select count(*) FROM facturation.facture where facturation.facture.payment_status = 0) as nbFactureNonPaye,"
               + "(select sum(facturation.devis.montantttc) FROM facturation.devis where facturation.devis.payment_status = 1) as montantDevisPaye,"

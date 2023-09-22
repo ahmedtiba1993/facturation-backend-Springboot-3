@@ -99,15 +99,15 @@ public class DevisServiceImpl implements DevisService {
     if (devis.getLigneDevis() != null) {
       for (LigneDevis ligneDevis : devis.getLigneDevis()) {
         int remise = ligneDevis.getRemise();
-        double montantProduit = ligneDevis.getProduit().getPrix() * ligneDevis.getQuantite();
-        if (ligneDevis.getProduit().getEtatRemise() == true) {
+        double montantProduit = ligneDevis.getPrixUnitaire() * ligneDevis.getQuantite();
+        if (ligneDevis.getRemise() > 0) {
           montantTotalProduit =
               montantTotalProduit + (montantProduit - (montantProduit * (remise / 100.0)));
         } else {
           montantTotalProduit = montantTotalProduit + montantProduit;
         }
         ligneDevis.setDevis(saveDevis);
-        ligneDevis.setPrixUnitaire(ligneDevis.getProduit().getPrix());
+        ligneDevis.setPrixUnitaire(ligneDevis.getPrixUnitaire());
         ligneDevis.setRemise(remise);
         ligneDevis.setPrixTotal((montantProduit - (montantProduit * (remise / 100.0))));
         ligneDevisRepository.save(ligneDevis);
