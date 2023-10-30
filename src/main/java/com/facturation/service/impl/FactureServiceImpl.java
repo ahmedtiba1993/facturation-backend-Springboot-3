@@ -19,6 +19,7 @@ import com.facturation.user.User;
 import com.facturation.user.UserRepository;
 import com.facturation.validator.FactureValidator;
 import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfLayer;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -195,9 +196,6 @@ public class FactureServiceImpl implements FactureService {
       throws DocumentException, IOException {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-    Document document = new Document();
-    PdfWriter.getInstance(document, outputStream);
-
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     User user = new User();
     if (authentication != null && authentication.isAuthenticated()) {
@@ -205,18 +203,23 @@ public class FactureServiceImpl implements FactureService {
       user = (User) authentication.getPrincipal();
     }
 
-    document.open();
     List<Facture> factureList = factureRepository.findFactureToPdf(ids);
 
-    for (Facture facutre : factureList) {
+    Document document = new Document();
+    PdfWriter writer = PdfWriter.getInstance(document, outputStream);
+
+    document.open();
+    for (Facture facture : factureList) {
       document.newPage();
+      document.setMargins(36, 36, 0, 0); // Les marges sont définies à zéro
 
       Image img = Image.getInstance("classpath:logofacture.png");
       img.scalePercent(35);
       img.setScaleToFitLineWhenOverflow(true);
       // Positionner l'image à gauche de la page
       float marginLeft = document.leftMargin(); // Récupérer la marge gauche du document
-      float imageX = marginLeft + 20; // Décalage de 20 unités de la marge gauche
+      float imageX = 10;
+      ; // Décalage de 20 unités de la marge gauche
       float imageY =
           document.getPageSize().getHeight()
               - img.getScaledHeight(); // Position verticale en haut de la page
@@ -327,10 +330,10 @@ public class FactureServiceImpl implements FactureService {
 
       // première colonne : informations de la facture
       PdfPCell celltable1 = new PdfPCell();
-      Paragraph f1 = new Paragraph("facture: " + facutre.getReference());
+      Paragraph f1 = new Paragraph("facture: " + facture.getReference());
       f1.setLeading(0, 1.5f);
 
-      Paragraph f2 = new Paragraph("Date: " + facutre.getDateFacture());
+      Paragraph f2 = new Paragraph("Date: " + facture.getDateFacture());
       f2.setLeading(0, 1.5f);
 
       celltable1.setBorder(Rectangle.NO_BORDER);
@@ -340,13 +343,13 @@ public class FactureServiceImpl implements FactureService {
 
       // deuxième colonne : informations du client
       PdfPCell celltable2 = new PdfPCell();
-      Paragraph f3 = new Paragraph("Client: " + facutre.getClient().getNomCommercial());
+      Paragraph f3 = new Paragraph("Client: " + facture.getClient().getNomCommercial());
       f3.setLeading(0, 1.5f);
 
-      Paragraph f4 = new Paragraph("Adresse: " + facutre.getClient().getAdresse());
+      Paragraph f4 = new Paragraph("Adresse: " + facture.getClient().getAdresse());
       f4.setLeading(0, 1.5f);
 
-      Paragraph f5 = new Paragraph("MF: " + facutre.getClient().getCode());
+      Paragraph f5 = new Paragraph("MF: " + facture.getClient().getCode());
       f5.setLeading(0, 1.5f);
 
       celltable2.setBorder(Rectangle.NO_BORDER);
@@ -356,7 +359,7 @@ public class FactureServiceImpl implements FactureService {
       celltable2.setPaddingLeft(30);
       table.addCell(celltable2);
 
-      table.setSpacingAfter(10f);
+      table.setSpacingAfter(5f);
       document.add(table);
 
       // Création d'un tableau avec 6 colonnes
@@ -402,7 +405,7 @@ public class FactureServiceImpl implements FactureService {
 
       DecimalFormat df = new DecimalFormat("#0.000");
       // Ajout des produits
-      for (LigneFacture l : facutre.getLignesFacture()) {
+      for (LigneFacture l : facture.getLignesFacture()) {
         int padding = 7;
 
         PdfPCell cell = new PdfPCell(new Phrase(l.getProduit().getCode()));
@@ -444,70 +447,72 @@ public class FactureServiceImpl implements FactureService {
 
       document.add(tableFacture);
 
-      PdfPTable tablePrix = new PdfPTable(2);
-      tablePrix.setWidthPercentage(50); // largeur de la table sur 50% de la page
-      tablePrix.setHorizontalAlignment(Element.ALIGN_RIGHT); // alignement à droite
-
-      PdfPCell cellTotalBrut = new PdfPCell(new Phrase("Total brut HT"));
-      cellTotalBrut.setBorder(Rectangle.NO_BORDER); // supprime les bordures de la cellule
-      cellTotalBrut.setPaddingTop(20);
-      cellTotalBrut.setPaddingBottom(7);
-      tablePrix.addCell(cellTotalBrut);
-
-      PdfPCell cellTotalBrutValue =
-          new PdfPCell(new Phrase(String.valueOf(df.format(facutre.getMontantHt()) + " TND")));
-      cellTotalBrutValue.setBorder(Rectangle.NO_BORDER);
-      cellTotalBrutValue.setPaddingTop(20);
-      cellTotalBrutValue.setPaddingBottom(7);
-      tablePrix.addCell(cellTotalBrutValue);
-
-      PdfPCell cellTVA = new PdfPCell(new Phrase("TVA 19 %"));
-      cellTVA.setBorder(Rectangle.NO_BORDER);
-      cellTVA.setPaddingBottom(7);
-      tablePrix.addCell(cellTVA);
-
-      PdfPCell cellTVAValue =
-          new PdfPCell(
-              new Phrase(String.valueOf(df.format(facutre.getMontantHt() * 0.19)) + " TND"));
-      cellTVAValue.setPaddingBottom(7);
-      cellTVAValue.setBorder(Rectangle.NO_BORDER);
-      tablePrix.addCell(cellTVAValue);
-
-      PdfPCell cellDroitTimbre = new PdfPCell(new Phrase("Droit de timbre"));
-      cellDroitTimbre.setPaddingBottom(7);
-      cellDroitTimbre.setBorder(Rectangle.NO_BORDER);
-      tablePrix.addCell(cellDroitTimbre);
-
-      PdfPCell cellDroitTimbreValue = new PdfPCell(new Phrase("1.000 TND"));
-      cellDroitTimbreValue.setPaddingBottom(7);
-      cellDroitTimbreValue.setBorder(Rectangle.NO_BORDER);
-      tablePrix.addCell(cellDroitTimbreValue);
-
-      PdfPCell cellTotalTTC =
-          new PdfPCell(new Phrase("Total TTC", new Font(Font.FontFamily.HELVETICA, 15, Font.BOLD)));
-      cellTotalTTC.setBorder(Rectangle.NO_BORDER);
-      tablePrix.addCell(cellTotalTTC);
-
-      PdfPCell cellTotalTTCValue =
-          new PdfPCell(
-              new Phrase(
-                  String.valueOf(df.format(facutre.getMontantTTC())) + " TND",
-                  new Font(Font.FontFamily.HELVETICA, 15, Font.BOLD)));
-      cellTotalTTCValue.setBorder(Rectangle.NO_BORDER);
-      tablePrix.addCell(cellTotalTTCValue);
-      tableFacture.setSpacingAfter(30);
-      document.add(tablePrix); // ajoute la table au document
-
-      int partieEntiere = (int) Math.floor(facutre.getMontantTTC());
-      double partieDecimale = facutre.getMontantTTC() - Math.floor(facutre.getMontantTTC());
+      int partieEntiere = (int) Math.floor(facture.getMontantTTC());
+      double partieDecimale = facture.getMontantTTC() - Math.floor(facture.getMontantTTC());
       int resultat = (int) (partieDecimale * 1000);
 
-      Paragraph pp1 = new Paragraph("Arrêté la présente facture à la somme de :");
-      document.add(pp1);
-      Paragraph pp2 =
+      // Créez un calque pour le texte en arrière-plan
+      PdfLayer backgroundLayer = new PdfLayer("Background Text", writer);
+      backgroundLayer.setOnPanel(false);
+      backgroundLayer.setPrint("Print", false);
+
+      // Activez le calque du texte en arrière-plan
+
+      writer.lockLayer(backgroundLayer);
+
+      // Ajoutez du texte principal
+      Font font = new Font(Font.FontFamily.HELVETICA, 12);
+      Paragraph paragraph =
           new Paragraph(
-              convertirEnLettres(partieEntiere) + " dinars et ( " + resultat + " ) millimes.");
-      document.add(pp2);
+              convertirEnLettres(partieEntiere) + " dinars et (" + resultat + ") millimes", font);
+
+      // Créez un tableau avec 1 ligne et 2 colonnes
+      PdfPTable table5 = new PdfPTable(2);
+      table5.setWidthPercentage(100);
+
+      // Première colonne
+      PdfPCell cell1 = new PdfPCell(paragraph);
+      cell1.addElement(new Paragraph("Arrêté la présente facture à la somme de :"));
+      cell1.addElement(paragraph);
+      cell1.setHorizontalAlignment(Element.ALIGN_CENTER);
+
+      // Supprimer les bordures de la cellule
+      cell1.setBorderColor(BaseColor.WHITE);
+      cell1.setBorderWidth(0);
+      cell1.setPaddingRight(30);
+      table5.addCell(cell1);
+
+      // Deuxième colonne
+      PdfPCell cell2 = new PdfPCell();
+      cell2.setHorizontalAlignment(Element.ALIGN_CENTER);
+
+      // Créez un paragraphe avec un interligne de 1,5
+      Paragraph paragraph6 = new Paragraph();
+      paragraph6.setLeading(20f); // Espacement de 1,5 fois la taille de la police
+
+      paragraph6.add(new Phrase("Total brut HT : " + df.format(facture.getMontantHt()) + " TND"));
+      paragraph6.add(Chunk.NEWLINE);
+
+      paragraph6.add(new Phrase("TVA 19 % : " + df.format(facture.getMontantHt() * 0.19) + " TND"));
+      paragraph6.add(Chunk.NEWLINE);
+
+      paragraph6.add(new Phrase("Droit de timbre : 1.000 TND"));
+      paragraph6.add(Chunk.NEWLINE);
+
+      cell2.addElement(paragraph6);
+
+      Font boldFont = new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD);
+      Paragraph boldParagraph =
+          new Paragraph("Total TTC : " + df.format(facture.getMontantTTC()) + " TND", boldFont);
+      cell2.addElement(boldParagraph);
+
+      // Supprimer les bordures de la cellule
+      cell2.setBorderColor(BaseColor.WHITE);
+      cell2.setBorderWidth(0);
+      table5.addCell(cell2);
+
+      // Ajoutez le tableau au document
+      document.add(table5);
     }
     document.close();
 
