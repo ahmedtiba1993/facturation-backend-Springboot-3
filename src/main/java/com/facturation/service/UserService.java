@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.HashMap;
 
-public interface userService {
+public interface UserService {
   User findByEmail(String email);
 
   ResponseEntity<HashMap<String, Object>> editPassword(Integer userId, String newPassword);

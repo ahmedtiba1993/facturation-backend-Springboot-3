@@ -27,8 +27,6 @@ public class Produit implements Serializable {
 
     private Double prix;
 
-    private int stock;
-
     private Boolean etatRemise;
 
     @ManyToOne

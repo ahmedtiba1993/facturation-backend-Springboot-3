@@ -34,10 +34,6 @@ public class ProduitValidator {
             errors.add("Le prix unitaire du produit doit être supérieur à 0");
         }
 
-        if (produit.getStock() <= 0) {
-            errors.add("Le stock doit être supérieur à 0");
-        }
-
         return errors;
     }
 }

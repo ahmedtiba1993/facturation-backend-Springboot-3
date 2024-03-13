@@ -4,7 +4,7 @@ spring:
       matching-strategy: ant-path-matcher
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/facturation
+    url: jdbc:mysql://mysql-ahmed:3306/facturation
     username: root
     password: admin
   jpa:

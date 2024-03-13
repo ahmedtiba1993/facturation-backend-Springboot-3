@@ -20,7 +20,6 @@ public class ProduitDto {
 
     private Double prix;
 
-    private int stock;
 
     private CategorieDto category;
 
@@ -37,7 +36,6 @@ public class ProduitDto {
                 .description(produit.getDescription())
                 .code(produit.getCode())
                 .prix(produit.getPrix())
-                .stock(produit.getStock())
                 .category(CategorieDto.fromEntity(produit.getCategorie()))
                 .etatRemise(produit.getEtatRemise())
                 .build();
@@ -55,7 +53,6 @@ public class ProduitDto {
             produit.setDescription(dto.getDescription());
             produit.setCode(dto.getCode());
             produit.setPrix(dto.getPrix());
-            produit.setStock(dto.getStock());
             produit.setEtatRemise(dto.getEtatRemise());
             produit.setCategorie(CategorieDto.toEntity(dto.getCategory()));
 

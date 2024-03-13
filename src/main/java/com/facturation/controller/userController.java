@@ -2,7 +2,7 @@ package com.facturation.controller;
 
 import com.facturation.controller.api.userApi;
 import com.facturation.dto.UserDto;
-import com.facturation.service.userService;
+import com.facturation.service.UserService;
 import com.facturation.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +13,10 @@ import java.util.HashMap;
 @RestController
 public class userController implements userApi {
 
-  private userService userService;
+  private UserService userService;
 
   @Autowired
-  public userController(com.facturation.service.userService userService) {
+  public userController(UserService userService) {
     this.userService = userService;
   }
 

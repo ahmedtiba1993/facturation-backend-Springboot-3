@@ -1,7 +1,7 @@
 package com.facturation.service.impl;
 
 import com.facturation.dto.UserDto;
-import com.facturation.service.userService;
+import com.facturation.service.UserService;
 import com.facturation.user.User;
 import com.facturation.user.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-public class userServiceImpl implements userService {
+public class userServiceImpl implements UserService {
 
   UserRepository userRepository;
   private PasswordEncoder passwordEncoder;

@@ -33,6 +33,8 @@ public class Devis {
 
   private Boolean paymentStatus;
 
+  private Boolean isFacture = false;
+
   @ManyToOne private Client client;
 
   @OneToMany(mappedBy = "devis", fetch = FetchType.LAZY)

@@ -50,7 +50,7 @@ public class SecurityConfiguration {
               configuration.setAllowedOrigins(
                   Arrays.asList(
                       "http://localhost:4200/",
-                      "http://aalarme.s3-website.eu-west-3.amazonaws.com/"));
+                      "http://nivesalarme.s3-website.eu-west-3.amazonaws.com/"));
               configuration.setAllowedMethods(Arrays.asList("*"));
               configuration.setAllowedHeaders(List.of("*"));
               return configuration;
