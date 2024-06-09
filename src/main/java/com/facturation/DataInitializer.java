@@ -1,18 +1,25 @@
 package com.facturation;
 
+import com.facturation.model.Facture;
 import com.facturation.model.NumFacture;
 import com.facturation.model.TimbreFiscal;
 import com.facturation.model.Tva;
+import com.facturation.repository.FactureRepository;
 import com.facturation.repository.NumFactureRepository;
 import com.facturation.repository.TimbreFiscalRepository;
 import com.facturation.repository.TvaRepository;
+import com.facturation.service.EmailService;
+import com.facturation.service.EmailTemplateName;
+import com.facturation.service.FactureService;
 import com.facturation.service.UserService;
+import com.facturation.service.impl.FactureServiceImpl;
 import com.facturation.user.Role;
 import com.facturation.user.User;
 import com.facturation.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,7 +28,7 @@ import java.util.Optional;
 @Component
 public class DataInitializer implements ApplicationRunner {
 
-    @Autowired
+   @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -33,9 +40,16 @@ public class DataInitializer implements ApplicationRunner {
     @Autowired
     private NumFactureRepository numFactureRepository;
 
-    @Override
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private FactureRepository factureRepository;
+    @Autowired
+    private FactureService factureService;
+
+ @Override
     public void run(ApplicationArguments args) throws Exception {
-        /*Optional<User> user = userRepository.findByEmail("admin");
+       /* Optional<User> user = userRepository.findByEmail("admin");
         List<Tva> tva = tvaRepository.findAll();
         List<TimbreFiscal> timbreFiscal= timbreFiscalRepository.findAll();
         if(user.isEmpty()){
@@ -74,5 +88,10 @@ public class DataInitializer implements ApplicationRunner {
             numFacture.setNumFacture(0);
             numFactureRepository.save(numFacture);
         }*/
+
+
+     //InputStreamResource pdfFile = factureService.generatePdf(List.of(Long.valueOf(4))).getBody();
+     //emailService.sendEmail("ahmed.tiba.1993@outlook.com", "ahmed tiba", EmailTemplateName.ACTIVATE_ACCOUNT, "test", "test", "Account activation",pdfFile.getFilename(),pdfFile);
+
     }
 }

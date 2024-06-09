@@ -14,4 +14,8 @@ public interface Constants {
   String TVA_ENDPOINT = APP_ROOT + "/tva";
 
   String DEVIS_ENDPOINT = APP_ROOT + "/devis";
+  String BONDE_LIVRAISON_ENDPOINT = APP_ROOT + "/bondelivraison";
+  String URLFILE_ENDPOINT = APP_ROOT + "/urlfile";
+
+
 }

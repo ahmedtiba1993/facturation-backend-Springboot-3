@@ -33,6 +33,8 @@ public class Client implements Serializable {
 
   private int remise;
 
+  private String email;
+
   @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
   private List<Facture> factures;
 

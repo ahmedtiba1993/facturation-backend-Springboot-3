@@ -4,9 +4,12 @@ import com.facturation.controller.api.FactureApi;
 import com.facturation.dto.FactureDto;
 import com.facturation.model.projection.RecapClient;
 import com.facturation.model.projection.Statistique;
+import com.facturation.service.EmailService;
+import com.facturation.service.EmailTemplateName;
 import com.facturation.service.FactureService;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -31,14 +34,18 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
+import static com.facturation.utils.Constants.FACTURE_ENDPOINT;
+
 @RestController
 public class FactureController implements FactureApi {
 
+  private final EmailService emailService;
   private FactureService factureService;
 
   @Autowired
-  public FactureController(FactureService factureService) {
+  public FactureController(FactureService factureService, EmailService emailService) {
     this.factureService = factureService;
+    this.emailService = emailService;
   }
 
   @Override
@@ -126,5 +133,11 @@ public class FactureController implements FactureApi {
   public ResponseEntity<Void> ajouterLigneFacture(
       Long factureId, Long idProduit, Double prix, Integer quantite, Integer remise) {
     return factureService.ajouterLingeFacture(factureId, idProduit, prix, quantite, remise);
+  }
+
+  @Override
+  public ResponseEntity<Void> sendMail(Long factureId) throws DocumentException, IOException, MessagingException {
+    emailService.sendEmailFacture(Long.valueOf(13) );
+    return ResponseEntity.ok().build();
   }
 }

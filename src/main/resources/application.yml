@@ -4,8 +4,9 @@ spring:
       matching-strategy: ant-path-matcher
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://mysql-ahmed:3306/facturation
+    url: jdbc:mysql://localhost:3306/facturation
     username: root
+    #password: 7j@P2w6#(xR7rT
     password: admin
   jpa:
 
@@ -15,3 +16,19 @@ spring:
       dialect: org.hibernate.dialect.mysql5dialect
     generate-ddl: true
     show-sql: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 465
+    username: ahmed.tiba.1993@gmail.com
+    password: vltq bugp pznr nmuo
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+            trust: "*"
+        starttls:
+          enabled: true
+    protocol: smtp

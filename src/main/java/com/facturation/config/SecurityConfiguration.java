@@ -14,6 +14,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.facturation.utils.Constants.URLFILE_ENDPOINT;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -38,7 +40,8 @@ public class SecurityConfiguration {
             "/configuration/security",
             "/swagger-ui/**",
             "/webjars/**",
-            "/swagger-ui.html")
+            "/swagger-ui.html",
+        "/"+URLFILE_ENDPOINT+"/pdf/*")
         .permitAll()
         .anyRequest()
         .authenticated()
@@ -50,7 +53,7 @@ public class SecurityConfiguration {
               configuration.setAllowedOrigins(
                   Arrays.asList(
                       "http://localhost:4200/",
-                      "http://nivesalarme.s3-website.eu-west-3.amazonaws.com/"));
+                      "http://213.32.89.149:8080/"));
               configuration.setAllowedMethods(Arrays.asList("*"));
               configuration.setAllowedHeaders(List.of("*"));
               return configuration;

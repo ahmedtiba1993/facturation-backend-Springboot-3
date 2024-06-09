@@ -23,6 +23,7 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.draw.LineSeparator;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -200,19 +201,20 @@ public class FactureServiceImpl implements FactureService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<InputStreamResource> generatePdf(List<Long> ids)
             throws DocumentException, IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         Document document = new Document();
         PdfWriter.getInstance(document, outputStream);
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.findByEmail("admin").get();
+        /*Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = new User();
         if (authentication != null && authentication.isAuthenticated()) {
             // Vous pouvez maintenant accéder aux informations de l'utilisateur
-            user = (User) authentication.getPrincipal();
-        }
+            //user = (User) authentication.getPrincipal();
+        }*/
 
         document.open();
         List<Facture> factureList = factureRepository.findFactureToPdf(ids);

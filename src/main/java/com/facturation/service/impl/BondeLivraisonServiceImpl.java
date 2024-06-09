@@ -1,15 +1,16 @@
 package com.facturation.service.impl;
 
+import com.facturation.dto.BondeLivraisonDto;
 import com.facturation.dto.DevisDto;
-import com.facturation.dto.FactureDto;
+import com.facturation.dto.LigneBondeLivraisonDto;
 import com.facturation.exception.EntityNotFoundException;
 import com.facturation.exception.ErrorCodes;
 import com.facturation.exception.InvalidEntityException;
 import com.facturation.model.*;
-import com.facturation.model.projection.ClientRecapProjection;
 import com.facturation.repository.*;
-import com.facturation.service.DevisService;
+import com.facturation.service.BondeLivraisonService;
 import com.facturation.service.TimbreFiscalService;
+import com.facturation.validator.BondeLivraisonValidator;
 import com.facturation.validator.DevisValidator;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
@@ -18,7 +19,6 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,44 +40,42 @@ import java.util.function.Function;
 import static com.facturation.utils.MontantEnLettres.convertirEnLettres;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
-public class DevisServiceImpl implements DevisService {
+@Slf4j
+public class BondeLivraisonServiceImpl implements BondeLivraisonService {
 
-    private final DevisRepository devisRepository;
     private final ClientRepository clientRepository;
     private final ProduitRepository produitRepository;
-    private final LigneDevisRepository ligneDevisRepository;
+    private final TvaRepository tvaRepository;
     private final TimbreFiscalService timbreFiscalService;
     private final NumFactureRepository numFactureRepository;
-    private final TvaRepository tvaRepository;
+    private final BondeLivraisonRepository bondeLivraisonRepository;
+    private final LigneBondeLivraisonRepository ligneBondeLivraisonRepository;
+    private final DevisRepository devisRepository;
+    private final LigneDevisRepository ligneDevisRepository;
     private final FactureRepository factureRepository;
     private final LigneFactureRepository ligneFactureRepository;
 
     @Override
-    public DevisDto save(Devis devis) {
-
-        List<String> errors = DevisValidator.validate(devis);
+    public BondeLivraisonDto save(BondeLivraison bondeLivraison) {
+        List<String> errors = BondeLivraisonValidator.validate(bondeLivraison);
 
         if (!errors.isEmpty()) {
-            log.error("Devis is not valid {} ", devis);
             throw new InvalidEntityException(
-                    "Devis n est pas valide", ErrorCodes.FACTURE_NOT_VALID, errors);
+                    "Bonde Livraison n est pas valide", ErrorCodes.FACTURE_NOT_VALID, errors);
         }
 
-        Optional<Client> client = clientRepository.findById(devis.getClient().getId());
+        Optional<Client> client = clientRepository.findById(bondeLivraison.getClient().getId());
         if (client.isEmpty()) {
-            log.error("Client not fond dans devis ", devis.getClient().getId());
             throw new EntityNotFoundException("Aucune client trouvée");
         }
 
         List<String> produitErrors = new ArrayList<String>();
-        if (devis.getLigneDevis() != null) {
-            for (LigneDevis ligneDevis : devis.getLigneDevis()) {
-                if (ligneDevis.getProduit() != null) {
-                    Optional<Produit> produit = produitRepository.findById(ligneDevis.getProduit().getId());
+        if (bondeLivraison.getLigneBondeLivraisons() != null) {
+            for (LigneBondeLivraison ligneBondeLivraison : bondeLivraison.getLigneBondeLivraisons()) {
+                if (ligneBondeLivraison.getProduit() != null) {
+                    Optional<Produit> produit = produitRepository.findById(ligneBondeLivraison.getProduit().getId());
                     if (produit.isEmpty()) {
-                        log.error("Produit not found dans facture ", ligneDevis.getProduit().getId());
                         produitErrors.add("prodtui introvable '");
                     }
                 }
@@ -92,81 +90,59 @@ public class DevisServiceImpl implements DevisService {
 
         int tauxTva = tvaRepository.getTvaByCode("TVA").getTva();
         double timbre = timbreFiscalService.getTimbreFiscale().getMontant();
-        devis.setTauxTVA(tauxTva);
-        devis.setReference(generateReference());
-        devis.setTimbreFiscale(timbre);
-        Devis saveDevis = devisRepository.save(devis);
+        bondeLivraison.setTauxTVA(tauxTva);
+        bondeLivraison.setReference(generateReference());
+        bondeLivraison.setTimbreFiscale(timbre);
+        BondeLivraison saveBondeLivraison = bondeLivraisonRepository.save(bondeLivraison);
 
         double montantTotalProduit = 0.0;
-        if (devis.getLigneDevis() != null) {
-            for (LigneDevis ligneDevis : devis.getLigneDevis()) {
-                int remise = ligneDevis.getRemise();
-                double montantProduit = ligneDevis.getProduit().getPrix() * ligneDevis.getQuantite();
-                if (ligneDevis.getProduit().getEtatRemise() == true) {
+        if (bondeLivraison.getLigneBondeLivraisons() != null) {
+            for (LigneBondeLivraison ligneBondeLivraison : bondeLivraison.getLigneBondeLivraisons()) {
+                int remise = ligneBondeLivraison.getRemise();
+                double montantProduit = ligneBondeLivraison.getProduit().getPrix() * ligneBondeLivraison.getQuantite();
+                if (ligneBondeLivraison.getProduit().getEtatRemise() == true) {
                     montantTotalProduit =
                             montantTotalProduit + (montantProduit - (montantProduit * (remise / 100.0)));
                 } else {
                     montantTotalProduit = montantTotalProduit + montantProduit;
                 }
-                ligneDevis.setDevis(saveDevis);
-                ligneDevis.setPrixUnitaire(ligneDevis.getProduit().getPrix());
-                ligneDevis.setRemise(remise);
-                ligneDevis.setPrixTotal((montantProduit - (montantProduit * (remise / 100.0))));
-                ligneDevisRepository.save(ligneDevis);
+                ligneBondeLivraison.setBondeLivraison(saveBondeLivraison);
+                ligneBondeLivraison.setPrixUnitaire(ligneBondeLivraison.getProduit().getPrix());
+                ligneBondeLivraison.setRemise(remise);
+                ligneBondeLivraison.setPrixTotal((montantProduit - (montantProduit * (remise / 100.0))));
+                ligneBondeLivraisonRepository.save(ligneBondeLivraison);
             }
         }
         double montantTotal =
                 montantTotalProduit + (montantTotalProduit * (tauxTva / 100.0)) + (timbre / 1000);
-        devisRepository.updateMontantTotal(saveDevis.getId(), montantTotalProduit, montantTotal);
-        return DevisDto.fromEntity(saveDevis);
+        bondeLivraisonRepository.updateMontantTotal(saveBondeLivraison.getId(), montantTotalProduit, montantTotal);
+        return BondeLivraisonDto.fromEntity(saveBondeLivraison);
     }
 
     @Override
-    public String generateReference() {
-
-        LocalDate today = LocalDate.now();
-        int year = today.getYear();
-
-        DecimalFormat decimalFormat = new DecimalFormat("000");
-        Integer numDevis = numFactureRepository.getNumDevis();
-        String nombreDeDevisFormatte = decimalFormat.format(numDevis + 1);
-        numFactureRepository.updateNumDevis(numDevis + 1);
-        return nombreDeDevisFormatte + "-" + year;
-    }
-
-    @Override
-    public Page<DevisDto> findAll(
-            Pageable pageable,
-            String refdevis,
-            Double minMontatnTTC,
-            Double maxMontatnTTC,
-            Boolean paymentStatus,
-            Long idClient,
-            LocalDate dateDebut,
-            LocalDate dateFin) {
-        Page<Devis> devis =
-                devisRepository.findAllFiltre(
+    public Page<BondeLivraisonDto> findAll(Pageable pageable, String refBondeLivraison, Double minMontatnTTC, Double maxMontatnTTC, Long idClient, LocalDate dateDebut, LocalDate dateFin) {
+        Page<BondeLivraison> bondeLivraisons =
+                bondeLivraisonRepository.findAllFiltre(
                         pageable,
-                        refdevis,
+                        refBondeLivraison,
                         minMontatnTTC,
                         maxMontatnTTC,
-                        paymentStatus,
                         idClient,
                         dateDebut,
                         dateFin);
-        Function<Devis, DevisDto> converter = DevisDto::fromEntity;
-        Page<DevisDto> devisDtosPage = devis.map(converter);
-        return devisDtosPage;
+        Function<BondeLivraison, BondeLivraisonDto> converter = BondeLivraisonDto::fromEntity;
+        Page<BondeLivraisonDto> bondeLivraisonDtoPage = bondeLivraisons.map(converter);
+        return bondeLivraisonDtoPage;
     }
 
     @Override
-    public DevisDto findById(Long id) {
+    public BondeLivraisonDto findById(Long id) {
         if (id == null) {
             return null;
         }
 
-        Optional<Devis> devis = devisRepository.findById(id);
-        DevisDto dto = devis.map(DevisDto::fromEntity).orElse(null);
+        Optional<BondeLivraison> bondeLivraison = bondeLivraisonRepository.findById(id);
+        BondeLivraisonDto dto = bondeLivraison.map(BondeLivraisonDto::fromEntity).orElse(null);
 
         if (dto == null) {
             throw new EntityNotFoundException(
@@ -177,17 +153,16 @@ public class DevisServiceImpl implements DevisService {
     }
 
     @Override
-    public ResponseEntity<InputStreamResource> generatePdf(List<Long> ids)
-            throws DocumentException, IOException {
+    public ResponseEntity<InputStreamResource> generatePdf(List<Long> ids) throws DocumentException, IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         Document document = new Document();
         PdfWriter.getInstance(document, outputStream);
 
         document.open();
-        List<Devis> devisList = devisRepository.findDevisToPdf(ids);
+        List<BondeLivraison> BondeLivraisonList = bondeLivraisonRepository.findBondeLivraisonToPdf(ids);
 
-        for (Devis devis : devisList) {
+        for (BondeLivraison bondeLivraison : BondeLivraisonList) {
             document.newPage();
 
             Image img = Image.getInstance("classpath:logofacture.png");
@@ -281,10 +256,10 @@ public class DevisServiceImpl implements DevisService {
 
             // première colonne : informations de la facture
             PdfPCell celltable1 = new PdfPCell();
-            Paragraph f1 = new Paragraph("Devis : " + devis.getReference());
+            Paragraph f1 = new Paragraph("Bonde de livraison : " + bondeLivraison.getReference());
             f1.setLeading(0, 1.5f);
 
-            Paragraph f2 = new Paragraph("Date: " + devis.getDateDevis());
+            Paragraph f2 = new Paragraph("Date: " + bondeLivraison.getDateBondeLivraison());
             f2.setLeading(0, 1.5f);
 
             celltable1.setBorder(Rectangle.NO_BORDER);
@@ -294,13 +269,13 @@ public class DevisServiceImpl implements DevisService {
 
             // deuxième colonne : informations du client
             PdfPCell celltable2 = new PdfPCell();
-            Paragraph f3 = new Paragraph("Client: " + devis.getClient().getNomCommercial());
+            Paragraph f3 = new Paragraph("Client: " + bondeLivraison.getClient().getNomCommercial());
             f3.setLeading(0, 1.5f);
 
-            Paragraph f4 = new Paragraph("Adresse: " + devis.getClient().getAdresse());
+            Paragraph f4 = new Paragraph("Adresse: " + bondeLivraison.getClient().getAdresse());
             f4.setLeading(0, 1.5f);
 
-            Paragraph f5 = new Paragraph("MF: " + devis.getClient().getCode());
+            Paragraph f5 = new Paragraph("MF: " + bondeLivraison.getClient().getCode());
             f5.setLeading(0, 1.5f);
 
             celltable2.setBorder(Rectangle.NO_BORDER);
@@ -356,7 +331,7 @@ public class DevisServiceImpl implements DevisService {
 
             DecimalFormat df = new DecimalFormat("#0.000");
             // Ajout des produits
-            for (LigneDevis l : devis.getLigneDevis()) {
+            for (LigneBondeLivraison l : bondeLivraison.getLigneBondeLivraisons()) {
 
                 tableFacture
                         .addCell(new PdfPCell(new Phrase(l.getProduit().getCode())))
@@ -395,7 +370,7 @@ public class DevisServiceImpl implements DevisService {
             tablePrix.addCell(cellTotalBrut);
 
             PdfPCell cellTotalBrutValue =
-                    new PdfPCell(new Phrase(String.valueOf(df.format(devis.getMontantHt()) + " TND")));
+                    new PdfPCell(new Phrase(String.valueOf(df.format(bondeLivraison.getMontantHt()) + " TND")));
             cellTotalBrutValue.setBorder(Rectangle.NO_BORDER);
             cellTotalBrutValue.setPaddingTop(20);
             cellTotalBrutValue.setPaddingBottom(7);
@@ -407,7 +382,7 @@ public class DevisServiceImpl implements DevisService {
             tablePrix.addCell(cellTVA);
 
             PdfPCell cellTVAValue =
-                    new PdfPCell(new Phrase(String.valueOf(df.format(devis.getMontantHt() * 0.19)) + " TND"));
+                    new PdfPCell(new Phrase(String.valueOf(df.format(bondeLivraison.getMontantHt() * 0.19)) + " TND"));
             cellTVAValue.setPaddingBottom(7);
             cellTVAValue.setBorder(Rectangle.NO_BORDER);
             tablePrix.addCell(cellTVAValue);
@@ -430,15 +405,15 @@ public class DevisServiceImpl implements DevisService {
             PdfPCell cellTotalTTCValue =
                     new PdfPCell(
                             new Phrase(
-                                    String.valueOf(df.format(devis.getMontantTTC())) + " TND",
+                                    String.valueOf(df.format(bondeLivraison.getMontantTTC())) + " TND",
                                     new Font(Font.FontFamily.HELVETICA, 15, Font.BOLD)));
             cellTotalTTCValue.setBorder(Rectangle.NO_BORDER);
             tablePrix.addCell(cellTotalTTCValue);
             tableFacture.setSpacingAfter(30);
             document.add(tablePrix); // ajoute la table au document
 
-            int partieEntiere = (int) Math.floor(devis.getMontantTTC());
-            double partieDecimale = devis.getMontantTTC() - Math.floor(devis.getMontantTTC());
+            int partieEntiere = (int) Math.floor(bondeLivraison.getMontantTTC());
+            double partieDecimale = bondeLivraison.getMontantTTC() - Math.floor(bondeLivraison.getMontantTTC());
             int resultat = (int) (partieDecimale * 1000);
 
             Paragraph pp1 = new Paragraph("Arrêté la présente facture à la somme de :");
@@ -462,142 +437,141 @@ public class DevisServiceImpl implements DevisService {
     }
 
     @Override
-    public ResponseEntity<Void> updateStatus(Long id) {
-        if (id == null) {
-            return null;
-        }
-
-        Optional<Devis> devis = devisRepository.findById(id);
-
-        if (!devis.isPresent()) {
-            throw new EntityNotFoundException(
-                    "Aucune facture trouvée dans la base de données", ErrorCodes.FACTURE_NOT_FOUND);
-        }
-        if (devis.get().getPaymentStatus() != null && devis.get().getPaymentStatus()) {
-            devisRepository.setStatusFalse(id);
-        } else {
-            devisRepository.setStatusTrue(id);
-        }
-
-        return ResponseEntity.ok().build();
+    public List<Long> findAllIds(String refBondeLivraison, Double minMontatnTTC, Double maxMontatnTTC, Long idClient, LocalDate dateDebut, LocalDate dateFin) {
+        return bondeLivraisonRepository.findAllIds(
+                refBondeLivraison, minMontatnTTC, maxMontatnTTC, idClient, dateDebut, dateFin);
     }
 
     @Override
-    public List<Long> findAllIds(
-            String refDevis,
-            Double minMontatnTTC,
-            Double maxMontatnTTC,
-            Boolean paymentStatus,
-            Long idClient,
-            LocalDate dateDebut,
-            LocalDate dateFin) {
-        return devisRepository.findAllIds(
-                refDevis, minMontatnTTC, maxMontatnTTC, paymentStatus, idClient, dateDebut, dateFin);
-    }
-
-    @Override
-    public ResponseEntity<Void> deleteDevis(Long id) {
-        if (id == null) {
-            return null;
-        }
-        ligneDevisRepository.deleteByIdDevis(id);
-        devisRepository.deleteById(id);
-        return ResponseEntity.ok().build();
-    }
-
-    @Override
-    public Page<ClientRecapProjection> getRecapClient(Pageable pageable) {
-        return devisRepository.getRecapClient(pageable);
-    }
-
-    @Override
-    public ResponseEntity<Void> createFactureFromDevis(Long id) {
-
-        DevisDto devisDto = findById(id);
-        Devis devis = DevisDto.toEntity(devisDto);
-        if (devis.getIsFacture() == true) {
-            return null;
-        }
-        // Copie des informations générales
-        Facture facture = new Facture();
-        facture.setDateFacture(devis.getDateDevis());
-        facture.setTauxTVA(devis.getTauxTVA());
-        facture.setMontantHt(devis.getMontantHt());
-        facture.setMontantTTC(devis.getMontantTTC());
-        facture.setTimbreFiscale(devis.getTimbreFiscale());
-        facture.setPaymentStatus(devis.getPaymentStatus());
-        facture.setClient(devis.getClient());
-        facture.setReference(generateReferenceFacture());
-        factureRepository.save(facture);
-
-        // Copie des lignes de devis en lignes de facture
-        List<LigneFacture> ligneFacturesList = new ArrayList<>();
-        List<LigneDevis> lDevis = ligneDevisRepository.findByDevisId(devis.getId());
-        for (LigneDevis ligneDevis : lDevis) {
-            LigneFacture ligneFacture = new LigneFacture();
-            ligneFacture.setProduit(ligneDevis.getProduit()); // Par exemple
-            ligneFacture.setQuantite(ligneDevis.getQuantite()); // Par exemple
-            ligneFacture.setPrixUnitaire(ligneDevis.getPrixUnitaire()); // Par exemple
-            // Calcul du prix total en fonction de la quantité, du prix unitaire et de la remise
-            ligneFacture.setPrixTotal(ligneDevis.getPrixTotal()); // À implémenter
-            ligneFacture.setFacture(facture);
-            ligneFactureRepository.save(ligneFacture);
-        }
-        devis.setIsFacture(true);
-        devisRepository.save(devis);
-        return ResponseEntity.ok().build();
-
-
-    }
-
-    @Override
-    public ResponseEntity<Void> deleteLingeDevis(Long devisId, Long ligneDevisId) {
-        DevisDto devisDto = findById(devisId);
-        LigneDevis ligneDevis = ligneDevisRepository.findById(ligneDevisId).get();
+    public ResponseEntity<Void> deleteLingeBondeLivraison(Long bondeId, Long ligneBondeLivraisonId) {
+        BondeLivraisonDto bondeLivraisonDto = findById(bondeId);
+        LigneBondeLivraison ligneBondeLivraison = ligneBondeLivraisonRepository.findById(ligneBondeLivraisonId).get();
 
         double timbre = timbreFiscalService.getTimbreFiscale().getMontant();
 
-        Double montantHt = devisDto.getMontantHt();
-        Double montantTTC = devisDto.getMontantTTC();
+        Double montantHt = bondeLivraisonDto.getMontantHt();
+        Double montantTTC = bondeLivraisonDto.getMontantTTC();
 
-        montantHt -= ligneDevis.getPrixTotal();
+        montantHt -= ligneBondeLivraison.getPrixTotal();
         montantTTC = montantHt + (montantHt * 0.19) + (timbre / 1000);
 
-        devisRepository.updateMontant(devisId, montantHt, montantTTC);
+        bondeLivraisonRepository.updateMontant(bondeId, montantHt, montantTTC);
 
-        this.ligneDevisRepository.deleteById(ligneDevisId);
+        this.ligneBondeLivraisonRepository.deleteById(ligneBondeLivraisonId);
 
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> ajouterLingeDevis(
-            Long devisId, Long idProduit, double prix, Integer quatite, Integer remise) {
-
-        DevisDto devisDto = findById(devisId);
+    public ResponseEntity<Void> ajouterLingeDevis(Long devisId, Long idProduit, double prix, Integer quatite, Integer remise) {
+        BondeLivraisonDto bondeLivraisonDto = findById(devisId);
         Produit produit = produitRepository.findById(idProduit).get();
 
-        LigneDevis ligneDevis = new LigneDevis();
-        ligneDevis.setProduit(produit);
-        ligneDevis.setRemise(remise);
-        ligneDevis.setPrixUnitaire(prix * quatite);
-        ligneDevis.setQuantite(quatite);
-        ligneDevis.setPrixTotal((quatite * prix) - ((quatite * prix) * (remise / 100.0)));
+        LigneBondeLivraison ligneBondeLivraison = new LigneBondeLivraison();
+        ligneBondeLivraison.setProduit(produit);
+        ligneBondeLivraison.setRemise(remise);
+        ligneBondeLivraison.setPrixUnitaire(prix * quatite);
+        ligneBondeLivraison.setQuantite(quatite);
+        ligneBondeLivraison.setPrixTotal((quatite * prix) - ((quatite * prix) * (remise / 100.0)));
 
-        Devis d = new Devis();
-        d.setId(devisDto.getId());
-        ligneDevis.setDevis(d);
-        ligneDevisRepository.save(ligneDevis);
+        BondeLivraison d = new BondeLivraison();
+        d.setId(bondeLivraisonDto.getId());
+        ligneBondeLivraison.setBondeLivraison(d);
+        ligneBondeLivraisonRepository.save(ligneBondeLivraison);
 
         Double prixProduit = (quatite * prix) - ((quatite * prix) * (remise / 100.0));
         double timbre = timbreFiscalService.getTimbreFiscale().getMontant();
 
-        Double montantHt = devisDto.getMontantHt() + prixProduit;
+        Double montantHt = bondeLivraisonDto.getMontantHt() + prixProduit;
         Double montantTTC = montantHt + (montantHt * 0.19) + (timbre / 1000);
 
-        devisRepository.updateMontant(devisId, montantHt, montantTTC);
+        bondeLivraisonRepository.updateMontant(devisId, montantHt, montantTTC);
 
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public Long convertToDevis(Long bondeId) {
+        BondeLivraison bondeLivraison = bondeLivraisonRepository.findById(bondeId).orElseThrow(()-> new EntityNotFoundException("NOT_FOUND"));
+
+        Devis devis = new Devis();
+        devis.setReference(generateReferenceDevis());
+        devis.setTauxTVA(bondeLivraison.getTauxTVA());
+        devis.setDateDevis(bondeLivraison.getDateBondeLivraison());
+        devis.setTimbreFiscale(bondeLivraison.getTimbreFiscale());
+        devis.setClient(bondeLivraison.getClient());
+        devis.setMontantHt(bondeLivraison.getMontantHt());
+        devis.setMontantTTC(bondeLivraison.getMontantTTC());
+        devis.setPaymentStatus(false);
+        devis = devisRepository.save(devis);
+
+        List<LigneDevis> ligneDevis = new ArrayList<>();
+        Devis finalDevis = devis;
+        bondeLivraison.getLigneBondeLivraisons().forEach(l -> {
+            LigneDevis ldevis = new LigneDevis();
+            ldevis.setProduit(l.getProduit());
+            ldevis.setRemise(l.getRemise());
+            ldevis.setQuantite(l.getQuantite());
+            ldevis.setPrixUnitaire(l.getPrixUnitaire());
+            ldevis.setPrixTotal(l.getPrixTotal());
+            ldevis.setDevis(finalDevis);
+            ligneDevisRepository.save(ldevis);
+        });
+
+        return devis.getId();
+    }
+
+    @Override
+    public Long convertToFacture(Long bondeId) {
+        BondeLivraison bondeLivraison = bondeLivraisonRepository.findById(bondeId).orElseThrow(()-> new EntityNotFoundException("NOT_FOUND"));
+        // Copie des informations générales
+        Facture facture = new Facture();
+        facture.setDateFacture(bondeLivraison.getDateBondeLivraison());
+        facture.setTauxTVA(bondeLivraison.getTauxTVA());
+        facture.setMontantHt(bondeLivraison.getMontantHt());
+        facture.setMontantTTC(bondeLivraison.getMontantTTC());
+        facture.setTimbreFiscale(bondeLivraison.getTimbreFiscale());
+        facture.setPaymentStatus(false);
+        facture.setClient(bondeLivraison.getClient());
+        facture.setReference(generateReferenceFacture());
+        factureRepository.save(facture);
+
+        List<LigneFacture> ligneFacturesList = new ArrayList<>();
+        for (LigneBondeLivraison ligneBondeLivraison : bondeLivraison.getLigneBondeLivraisons()) {
+            LigneFacture ligneFacture = new LigneFacture();
+            ligneFacture.setProduit(ligneBondeLivraison.getProduit());
+            ligneFacture.setQuantite(ligneBondeLivraison.getQuantite());
+            ligneFacture.setPrixUnitaire(ligneBondeLivraison.getPrixUnitaire());
+            ligneFacture.setPrixTotal(ligneBondeLivraison.getPrixTotal());
+            ligneFacture.setRemise(ligneBondeLivraison.getRemise());
+            ligneFacture.setFacture(facture);
+            ligneFactureRepository.save(ligneFacture);
+        }
+        return facture.getId();
+    }
+
+    public String generateReferenceDevis() {
+
+        LocalDate today = LocalDate.now();
+        int year = today.getYear();
+
+        DecimalFormat decimalFormat = new DecimalFormat("000");
+        Integer numDevis = numFactureRepository.getNumDevis();
+        String nombreDeDevisFormatte = decimalFormat.format(numDevis + 1);
+        numFactureRepository.updateNumDevis(numDevis + 1);
+        return nombreDeDevisFormatte + "-" + year;
+    }
+
+    public String generateReference() {
+
+        LocalDate today = LocalDate.now();
+        int year = today.getYear();
+
+        DecimalFormat decimalFormat = new DecimalFormat("000");
+        Integer numDevis = numFactureRepository.getNumDevis();
+        String nombreDeDevisFormatte = decimalFormat.format(numDevis + 1);
+        numFactureRepository.updateNumDevis(numDevis + 1);
+        return nombreDeDevisFormatte + "-" + year;
     }
 
     public String generateReferenceFacture() {

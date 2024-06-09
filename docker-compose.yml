@@ -1,0 +1,40 @@
+services:
+  mysql:
+    container_name: mysqlDb
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 7j@P2w6#(xR7rT
+      MYSQL_DATABASE: facturation
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqlDbDATA:/var/lib/mysql
+    networks:
+      - spring-boot-network-facturation
+
+  facturation-api:
+    container_name: facturation-api
+    image: facturation
+    ports:
+      - 8088:8088
+    networks:
+      - spring-boot-network-facturation
+    depends_on: # Dependencies of the service
+      - mysql # This service depends on another service named "postgres"
+
+  facturation-ui:
+    container_name: facturation-ui
+    image: facutration-ui
+    ports:
+      - 8080:80
+    networks:
+      - spring-boot-network-facturation
+    depends_on:
+      - facturation-api
+
+volumes:
+  mysqlDbDATA:
+
+networks :
+  spring-boot-network-facturation:
+    driver: bridge
