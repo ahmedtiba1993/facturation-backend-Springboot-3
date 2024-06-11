@@ -23,8 +23,8 @@ public interface UrlFileApi {
     ResponseEntity<UrlFileDto> create(String type, Long id);
 
     @GetMapping(value = URLFILE_ENDPOINT+"/pdf/{uuid}", produces = MediaType.APPLICATION_JSON_VALUE )
-    ResponseEntity<FactureDto> getFactureId(@PathVariable UUID uuid);
+    ResponseEntity<UrlFileDto> getUrlFile(@PathVariable UUID uuid);
 
-    @GetMapping(value =URLFILE_ENDPOINT+"/pdf/{factureId}")
-    ResponseEntity<InputStreamResource> getFacturePdf(@PathVariable Long factureId) throws DocumentException, IOException;
+    @GetMapping(value =URLFILE_ENDPOINT+"/pdf/{id}/{type}")
+    ResponseEntity<InputStreamResource> getFacturePdf(@PathVariable Long id, @PathVariable String type) throws DocumentException, IOException;
 }

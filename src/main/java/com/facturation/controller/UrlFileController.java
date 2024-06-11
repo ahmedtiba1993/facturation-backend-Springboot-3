@@ -25,12 +25,12 @@ public class UrlFileController implements UrlFileApi {
     }
 
     @Override
-    public ResponseEntity<FactureDto> getFactureId(UUID uuid) {
-        return ResponseEntity.ok().body(urlFileService.getFactureId(uuid));
+    public ResponseEntity<UrlFileDto> getUrlFile(UUID uuid) {
+        return ResponseEntity.ok().body(urlFileService.getUrlFile(uuid));
     }
 
     @Override
-    public ResponseEntity<InputStreamResource> getFacturePdf(Long factureId) throws DocumentException, IOException {
-        return urlFileService.generatePdf(factureId);
+    public ResponseEntity<InputStreamResource> getFacturePdf(Long id, String type) throws DocumentException, IOException {
+        return urlFileService.generatePdf(id, type);
     }
 }

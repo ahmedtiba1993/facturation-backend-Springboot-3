@@ -14,8 +14,8 @@ public interface UrlFileService {
 
     UrlFileDto createUrlFile(Long id, String type);
 
-    FactureDto getFactureId(UUID uuid);
+    UrlFileDto getUrlFile(UUID uuid);
 
-    ResponseEntity<InputStreamResource> generatePdf(Long id)
+    ResponseEntity<InputStreamResource> generatePdf(Long id, String type)
             throws DocumentException, IOException;
 }

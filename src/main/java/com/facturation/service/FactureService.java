@@ -56,4 +56,9 @@ public interface FactureService {
 
   ResponseEntity<Void> ajouterLingeFacture(
       Long factureId, Long idProduit, double prix, Integer quatite, Integer remise);
+
+  Long creationDevis(Long factureId);
+
+  Long creationBonLivraison(Long factureId);
+
 }

@@ -6,10 +6,7 @@ import com.facturation.dto.UserDto;
 import com.facturation.exception.EntityNotFoundException;
 import com.facturation.exception.ErrorCodes;
 import com.facturation.exception.InvalidEntityException;
-import com.facturation.model.Client;
-import com.facturation.model.Facture;
-import com.facturation.model.LigneFacture;
-import com.facturation.model.Produit;
+import com.facturation.model.*;
 import com.facturation.model.projection.RecapClient;
 import com.facturation.model.projection.Statistique;
 import com.facturation.repository.*;
@@ -77,6 +74,14 @@ public class FactureServiceImpl implements FactureService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private DevisRepository devisRepository;
+    @Autowired
+    private LigneDevisRepository ligneDevisRepository;
+    @Autowired
+    private BondeLivraisonRepository bondeLivraisonRepository;
+    @Autowired
+    private LigneBondeLivraisonRepository ligneBondeLivraisonRepository;
 
     @Override
     public FactureDto save(FactureDto dto) {
@@ -84,8 +89,7 @@ public class FactureServiceImpl implements FactureService {
 
         if (!errors.isEmpty()) {
             log.error("Facture is not valid {} ", dto);
-            throw new InvalidEntityException(
-                    "Facture n est pas valide", ErrorCodes.FACTURE_NOT_VALID, errors);
+            throw new InvalidEntityException("Facture n est pas valide", ErrorCodes.FACTURE_NOT_VALID, errors);
         }
 
         Optional<Client> client = clientRepository.findById(dto.getClient().getId());
@@ -98,8 +102,7 @@ public class FactureServiceImpl implements FactureService {
         if (dto.getLignesFacture() != null) {
             for (LigneFactureDto ligneFactureDto : dto.getLignesFacture()) {
                 if (ligneFactureDto.getProduit() != null) {
-                    Optional<Produit> produit =
-                            produitRepository.findById(ligneFactureDto.getProduit().getId());
+                    Optional<Produit> produit = produitRepository.findById(ligneFactureDto.getProduit().getId());
                     if (produit.isEmpty()) {
                         log.error("Produit not found dans facture ", ligneFactureDto.getProduit().getId());
                         produitErrors.add("prodtui introvable '");
@@ -110,8 +113,7 @@ public class FactureServiceImpl implements FactureService {
 
         if (!produitErrors.isEmpty()) {
             log.warn("");
-            throw new InvalidEntityException(
-                    "prodiot n'existe pas dans la BDD", ErrorCodes.PRODUIT_NOT_FOUND, produitErrors);
+            throw new InvalidEntityException("prodiot n'existe pas dans la BDD", ErrorCodes.PRODUIT_NOT_FOUND, produitErrors);
         }
 
         int tauxTva = tvaRepository.getTvaByCode("TVA").getTva();
@@ -127,8 +129,7 @@ public class FactureServiceImpl implements FactureService {
                 int remise = ligneFact.getRemise();
                 double montantProduit = ligneFact.getProduit().getPrix() * ligneFact.getQuantite();
                 if (ligneFact.getProduit().getEtatRemise() == true) {
-                    montantTotalProduit =
-                            montantTotalProduit + (montantProduit - (montantProduit * (remise / 100.0)));
+                    montantTotalProduit = montantTotalProduit + (montantProduit - (montantProduit * (remise / 100.0)));
                 } else {
                     montantTotalProduit = montantTotalProduit + montantProduit;
                 }
@@ -140,8 +141,7 @@ public class FactureServiceImpl implements FactureService {
                 ligneFactureRepository.save(ligneFacture);
             }
         }
-        double montantTotal =
-                montantTotalProduit + (montantTotalProduit * (tauxTva / 100.0)) + (timbre / 1000);
+        double montantTotal = montantTotalProduit + (montantTotalProduit * (tauxTva / 100.0)) + (timbre / 1000);
         factureRepository.updateMontantTotal(saveFacture.getId(), montantTotalProduit, montantTotal);
         return FactureDto.fromEntity(saveFacture);
     }
@@ -159,25 +159,8 @@ public class FactureServiceImpl implements FactureService {
     }
 
     @Override
-    public Page<FactureDto> findAll(
-            Pageable pageable,
-            String refFacture,
-            Double minMontatnTTC,
-            Double maxMontatnTTC,
-            Boolean paymentStatus,
-            Long idClient,
-            LocalDate dateDebut,
-            LocalDate dateFin) {
-        Page<Facture> factures =
-                factureRepository.findAllFiltre(
-                        pageable,
-                        refFacture,
-                        minMontatnTTC,
-                        maxMontatnTTC,
-                        paymentStatus,
-                        idClient,
-                        dateDebut,
-                        dateFin);
+    public Page<FactureDto> findAll(Pageable pageable, String refFacture, Double minMontatnTTC, Double maxMontatnTTC, Boolean paymentStatus, Long idClient, LocalDate dateDebut, LocalDate dateFin) {
+        Page<Facture> factures = factureRepository.findAllFiltre(pageable, refFacture, minMontatnTTC, maxMontatnTTC, paymentStatus, idClient, dateDebut, dateFin);
         Function<Facture, FactureDto> converter = FactureDto::fromEntity;
         Page<FactureDto> factureDtosPage = factures.map(converter);
         return factureDtosPage;
@@ -193,8 +176,7 @@ public class FactureServiceImpl implements FactureService {
         FactureDto dto = facture.map(FactureDto::fromEntity).orElse(null);
 
         if (dto == null) {
-            throw new EntityNotFoundException(
-                    "Aucune facture trouvée dans la base de données", ErrorCodes.FACTURE_NOT_FOUND);
+            throw new EntityNotFoundException("Aucune facture trouvée dans la base de données", ErrorCodes.FACTURE_NOT_FOUND);
         }
 
         return dto;
@@ -202,8 +184,7 @@ public class FactureServiceImpl implements FactureService {
 
     @Override
     @Transactional
-    public ResponseEntity<InputStreamResource> generatePdf(List<Long> ids)
-            throws DocumentException, IOException {
+    public ResponseEntity<InputStreamResource> generatePdf(List<Long> ids) throws DocumentException, IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         Document document = new Document();
@@ -228,27 +209,20 @@ public class FactureServiceImpl implements FactureService {
             // Positionner l'image à gauche de la page
             float marginLeft = document.leftMargin(); // Récupérer la marge gauche du document
             float imageX = marginLeft + 20; // Décalage de 20 unités de la marge gauche
-            float imageY =
-                    document.getPageSize().getHeight()
-                            - img.getScaledHeight(); // Position verticale en haut de la page
+            float imageY = document.getPageSize().getHeight() - img.getScaledHeight(); // Position verticale en haut de la page
             img.setAbsolutePosition(imageX, imageY);
             document.add(img);
 
             PdfPCell cellTitle = new PdfPCell();
-            Paragraph title =
-                    new Paragraph("Alarme Assistance", new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD));
+            Paragraph title = new Paragraph("Alarme Assistance", new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD));
             title.setAlignment(Element.ALIGN_CENTER);
             cellTitle.addElement(title);
 
-            Paragraph subTitle =
-                    new Paragraph("Nifes Jilani", new Font(Font.FontFamily.HELVETICA, 14, Font.NORMAL));
+            Paragraph subTitle = new Paragraph("Nifes Jilani", new Font(Font.FontFamily.HELVETICA, 14, Font.NORMAL));
             subTitle.setAlignment(Element.ALIGN_CENTER);
             cellTitle.addElement(subTitle);
 
-            Paragraph sousSubTitle =
-                    new Paragraph(
-                            "Vente et installation de matériel de sécurité électronique",
-                            new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL));
+            Paragraph sousSubTitle = new Paragraph("Vente et installation de matériel de sécurité électronique", new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL));
             sousSubTitle.setAlignment(Element.ALIGN_CENTER);
             cellTitle.addElement(sousSubTitle);
 
@@ -291,32 +265,11 @@ public class FactureServiceImpl implements FactureService {
 
             // deuxième colonne : informations du client
             PdfPCell celltableHeader2 = new PdfPCell();
-            Paragraph p6 =
-                    new Paragraph(
-                            "Téléphone: "
-                                    + user.getTel().toString().substring(0, 2)
-                                    + " "
-                                    + user.getTel().toString().substring(2, 4)
-                                    + " "
-                                    + user.getTel().toString().substring(4));
+            Paragraph p6 = new Paragraph("Téléphone: " + user.getTel().toString().substring(0, 2) + " " + user.getTel().toString().substring(2, 4) + " " + user.getTel().toString().substring(4));
             p6.setLeading(0, 1.5f);
-            Paragraph p7 =
-                    new Paragraph(
-                            "Fax: "
-                                    + user.getFax().toString().substring(0, 2)
-                                    + " "
-                                    + user.getFax().toString().substring(2, 4)
-                                    + " "
-                                    + user.getFax().toString().substring(4));
+            Paragraph p7 = new Paragraph("Fax: " + user.getFax().toString().substring(0, 2) + " " + user.getFax().toString().substring(2, 4) + " " + user.getFax().toString().substring(4));
             p7.setLeading(0, 1.5f);
-            Paragraph p8 =
-                    new Paragraph(
-                            "Mobile: "
-                                    + user.getMobile().toString().substring(0, 2)
-                                    + " "
-                                    + user.getMobile().toString().substring(2, 4)
-                                    + " "
-                                    + user.getMobile().toString().substring(4));
+            Paragraph p8 = new Paragraph("Mobile: " + user.getMobile().toString().substring(0, 2) + " " + user.getMobile().toString().substring(2, 4) + " " + user.getMobile().toString().substring(4));
             p8.setLeading(0, 1.5f);
             celltableHeader2.addElement(p6);
             celltableHeader2.addElement(p7);
@@ -376,38 +329,32 @@ public class FactureServiceImpl implements FactureService {
             tableFacture.setWidthPercentage(110);
 
             PdfPCell cell11 = new PdfPCell(new Phrase("Code produit"));
-            cell11.setHorizontalAlignment(
-                    Element.ALIGN_CENTER); // définit l'alignement horizontal au centre
+            cell11.setHorizontalAlignment(Element.ALIGN_CENTER); // définit l'alignement horizontal au centre
             cell11.setBackgroundColor(BaseColor.LIGHT_GRAY); // définit la couleur de fond
             tableFacture.addCell(cell11);
 
             PdfPCell cell12 = new PdfPCell(new Phrase("Désignation"));
-            cell12.setHorizontalAlignment(
-                    Element.ALIGN_CENTER); // définit l'alignement horizontal au centre
+            cell12.setHorizontalAlignment(Element.ALIGN_CENTER); // définit l'alignement horizontal au centre
             cell12.setBackgroundColor(BaseColor.LIGHT_GRAY); // définit la couleur de fond
             tableFacture.addCell(cell12);
 
             PdfPCell cell13 = new PdfPCell(new Phrase("Quantité"));
-            cell13.setHorizontalAlignment(
-                    Element.ALIGN_CENTER); // définit l'alignement horizontal au centre
+            cell13.setHorizontalAlignment(Element.ALIGN_CENTER); // définit l'alignement horizontal au centre
             cell13.setBackgroundColor(BaseColor.LIGHT_GRAY); // définit la couleur de fond
             tableFacture.addCell(cell13);
 
             PdfPCell cell14 = new PdfPCell(new Phrase("Prix Unitaire"));
-            cell14.setHorizontalAlignment(
-                    Element.ALIGN_CENTER); // définit l'alignement horizontal au centre
+            cell14.setHorizontalAlignment(Element.ALIGN_CENTER); // définit l'alignement horizontal au centre
             cell14.setBackgroundColor(BaseColor.LIGHT_GRAY); // définit la couleur de fond
             tableFacture.addCell(cell14);
 
             PdfPCell cell15 = new PdfPCell(new Phrase("Remise"));
-            cell15.setHorizontalAlignment(
-                    Element.ALIGN_CENTER); // définit l'alignement horizontal au centre
+            cell15.setHorizontalAlignment(Element.ALIGN_CENTER); // définit l'alignement horizontal au centre
             cell15.setBackgroundColor(BaseColor.LIGHT_GRAY); // définit la couleur de fond
             tableFacture.addCell(cell15);
 
             PdfPCell cell16 = new PdfPCell(new Phrase("Total HT"));
-            cell16.setHorizontalAlignment(
-                    Element.ALIGN_CENTER); // définit l'alignement horizontal au centre
+            cell16.setHorizontalAlignment(Element.ALIGN_CENTER); // définit l'alignement horizontal au centre
             cell16.setBackgroundColor(BaseColor.LIGHT_GRAY); // définit la couleur de fond
             tableFacture.addCell(cell16);
 
@@ -415,25 +362,12 @@ public class FactureServiceImpl implements FactureService {
             // Ajout des produits
             for (LigneFacture l : facutre.getLignesFacture()) {
 
-                tableFacture
-                        .addCell(new PdfPCell(new Phrase(l.getProduit().getCode())))
-                        .setHorizontalAlignment(Element.ALIGN_CENTER);
-                tableFacture
-                        .addCell(new PdfPCell(new Phrase(l.getProduit().getDescription())))
-                        .setHorizontalAlignment(Element.ALIGN_CENTER);
-                tableFacture
-                        .addCell(new PdfPCell(new Phrase(String.valueOf(l.getQuantite()))))
-                        .setHorizontalAlignment(Element.ALIGN_CENTER);
-                tableFacture
-                        .addCell(
-                                new PdfPCell(new Phrase(String.valueOf(df.format(l.getPrixUnitaire()) + " TND"))))
-                        .setHorizontalAlignment(Element.ALIGN_CENTER);
-                tableFacture
-                        .addCell(new PdfPCell(new Phrase(String.valueOf(l.getRemise()) + "%")))
-                        .setHorizontalAlignment(Element.ALIGN_CENTER);
-                tableFacture
-                        .addCell(new PdfPCell(new Phrase(df.format(l.getPrixTotal()) + " TND")))
-                        .setHorizontalAlignment(Element.ALIGN_CENTER);
+                tableFacture.addCell(new PdfPCell(new Phrase(l.getProduit().getCode()))).setHorizontalAlignment(Element.ALIGN_CENTER);
+                tableFacture.addCell(new PdfPCell(new Phrase(l.getProduit().getDescription()))).setHorizontalAlignment(Element.ALIGN_CENTER);
+                tableFacture.addCell(new PdfPCell(new Phrase(String.valueOf(l.getQuantite())))).setHorizontalAlignment(Element.ALIGN_CENTER);
+                tableFacture.addCell(new PdfPCell(new Phrase(String.valueOf(df.format(l.getPrixUnitaire()) + " TND")))).setHorizontalAlignment(Element.ALIGN_CENTER);
+                tableFacture.addCell(new PdfPCell(new Phrase(String.valueOf(l.getRemise()) + "%"))).setHorizontalAlignment(Element.ALIGN_CENTER);
+                tableFacture.addCell(new PdfPCell(new Phrase(df.format(l.getPrixTotal()) + " TND"))).setHorizontalAlignment(Element.ALIGN_CENTER);
             }
 
             // Ajout du tableau au document
@@ -451,8 +385,7 @@ public class FactureServiceImpl implements FactureService {
             cellTotalBrut.setPaddingBottom(7);
             tablePrix.addCell(cellTotalBrut);
 
-            PdfPCell cellTotalBrutValue =
-                    new PdfPCell(new Phrase(String.valueOf(df.format(facutre.getMontantHt()) + " TND")));
+            PdfPCell cellTotalBrutValue = new PdfPCell(new Phrase(String.valueOf(df.format(facutre.getMontantHt()) + " TND")));
             cellTotalBrutValue.setBorder(Rectangle.NO_BORDER);
             cellTotalBrutValue.setPaddingTop(20);
             cellTotalBrutValue.setPaddingBottom(7);
@@ -463,9 +396,7 @@ public class FactureServiceImpl implements FactureService {
             cellTVA.setPaddingBottom(7);
             tablePrix.addCell(cellTVA);
 
-            PdfPCell cellTVAValue =
-                    new PdfPCell(
-                            new Phrase(String.valueOf(df.format(facutre.getMontantHt() * 0.19)) + " TND"));
+            PdfPCell cellTVAValue = new PdfPCell(new Phrase(String.valueOf(df.format(facutre.getMontantHt() * 0.19)) + " TND"));
             cellTVAValue.setPaddingBottom(7);
             cellTVAValue.setBorder(Rectangle.NO_BORDER);
             tablePrix.addCell(cellTVAValue);
@@ -480,16 +411,11 @@ public class FactureServiceImpl implements FactureService {
             cellDroitTimbreValue.setBorder(Rectangle.NO_BORDER);
             tablePrix.addCell(cellDroitTimbreValue);
 
-            PdfPCell cellTotalTTC =
-                    new PdfPCell(new Phrase("Total TTC", new Font(Font.FontFamily.HELVETICA, 15, Font.BOLD)));
+            PdfPCell cellTotalTTC = new PdfPCell(new Phrase("Total TTC", new Font(Font.FontFamily.HELVETICA, 15, Font.BOLD)));
             cellTotalTTC.setBorder(Rectangle.NO_BORDER);
             tablePrix.addCell(cellTotalTTC);
 
-            PdfPCell cellTotalTTCValue =
-                    new PdfPCell(
-                            new Phrase(
-                                    String.valueOf(df.format(facutre.getMontantTTC())) + " TND",
-                                    new Font(Font.FontFamily.HELVETICA, 15, Font.BOLD)));
+            PdfPCell cellTotalTTCValue = new PdfPCell(new Phrase(String.valueOf(df.format(facutre.getMontantTTC())) + " TND", new Font(Font.FontFamily.HELVETICA, 15, Font.BOLD)));
             cellTotalTTCValue.setBorder(Rectangle.NO_BORDER);
             tablePrix.addCell(cellTotalTTCValue);
             tableFacture.setSpacingAfter(30);
@@ -501,9 +427,7 @@ public class FactureServiceImpl implements FactureService {
 
             Paragraph pp1 = new Paragraph("Arrêté la présente facture à la somme de :");
             document.add(pp1);
-            Paragraph pp2 =
-                    new Paragraph(
-                            convertirEnLettres(partieEntiere) + " dinars et ( " + resultat + " ) millimes.");
+            Paragraph pp2 = new Paragraph(convertirEnLettres(partieEntiere) + " dinars et ( " + resultat + " ) millimes.");
             document.add(pp2);
         }
         document.close();
@@ -513,10 +437,7 @@ public class FactureServiceImpl implements FactureService {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Disposition", "inline; filename=" + LocalDateTime.now() + ".pdf");
 
-        return ResponseEntity.ok()
-                .headers(headers)
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(new InputStreamResource(inputStream));
+        return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF).body(new InputStreamResource(inputStream));
     }
 
     @Override
@@ -529,8 +450,7 @@ public class FactureServiceImpl implements FactureService {
         Optional<Facture> facture = factureRepository.findById(id);
 
         if (!facture.isPresent()) {
-            throw new EntityNotFoundException(
-                    "Aucune facture trouvée dans la base de données", ErrorCodes.FACTURE_NOT_FOUND);
+            throw new EntityNotFoundException("Aucune facture trouvée dans la base de données", ErrorCodes.FACTURE_NOT_FOUND);
         }
         if (facture.get().getPaymentStatus() != null && facture.get().getPaymentStatus()) {
             factureRepository.setStatusFalse(id);
@@ -552,16 +472,8 @@ public class FactureServiceImpl implements FactureService {
     }
 
     @Override
-    public List<Long> findAllIds(
-            String refFacture,
-            Double minMontatnTTC,
-            Double maxMontatnTTC,
-            Boolean paymentStatus,
-            Long idClient,
-            LocalDate dateDebut,
-            LocalDate dateFin) {
-        return factureRepository.findAllIds(
-                refFacture, minMontatnTTC, maxMontatnTTC, paymentStatus, idClient, dateDebut, dateFin);
+    public List<Long> findAllIds(String refFacture, Double minMontatnTTC, Double maxMontatnTTC, Boolean paymentStatus, Long idClient, LocalDate dateDebut, LocalDate dateFin) {
+        return factureRepository.findAllIds(refFacture, minMontatnTTC, maxMontatnTTC, paymentStatus, idClient, dateDebut, dateFin);
     }
 
     @Override
@@ -595,8 +507,7 @@ public class FactureServiceImpl implements FactureService {
     }
 
     @Override
-    public ResponseEntity<Void> ajouterLingeFacture(
-            Long factureId, Long idProduit, double prix, Integer quatite, Integer remise) {
+    public ResponseEntity<Void> ajouterLingeFacture(Long factureId, Long idProduit, double prix, Integer quatite, Integer remise) {
 
         FactureDto factureDto = findById(factureId);
         Produit produit = produitRepository.findById(idProduit).get();
@@ -622,5 +533,77 @@ public class FactureServiceImpl implements FactureService {
         factureRepository.updateMontant(factureId, montantHt, montantTTC);
 
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public Long creationDevis(Long factureId) {
+        Facture facture = factureRepository.findById(factureId).orElseThrow(() -> new EntityNotFoundException("NOT_FOUND"));
+
+        Devis devis = new Devis();
+        devis.setReference(generateReferenceDevis());
+        devis.setTauxTVA(facture.getTauxTVA());
+        devis.setDateDevis(facture.getDateFacture());
+        devis.setTimbreFiscale(facture.getTimbreFiscale());
+        devis.setClient(facture.getClient());
+        devis.setMontantHt(facture.getMontantHt());
+        devis.setMontantTTC(facture.getMontantTTC());
+        devis.setPaymentStatus(false);
+        devis = devisRepository.save(devis);
+
+        Devis finalDevis = devis;
+        facture.getLignesFacture().forEach(l -> {
+            LigneDevis ldevis = new LigneDevis();
+            ldevis.setProduit(l.getProduit());
+            ldevis.setRemise(l.getRemise());
+            ldevis.setQuantite(l.getQuantite());
+            ldevis.setPrixUnitaire(l.getPrixUnitaire());
+            ldevis.setPrixTotal(l.getPrixTotal());
+            ldevis.setDevis(finalDevis);
+            ligneDevisRepository.save(ldevis);
+        });
+
+        return devis.getId();
+    }
+
+    public String generateReferenceDevis() {
+
+        LocalDate today = LocalDate.now();
+        int year = today.getYear();
+
+        DecimalFormat decimalFormat = new DecimalFormat("000");
+        Integer numDevis = numFactureRepository.getNumDevis();
+        String nombreDeDevisFormatte = decimalFormat.format(numDevis + 1);
+        numFactureRepository.updateNumDevis(numDevis + 1);
+        return nombreDeDevisFormatte + "-" + year;
+    }
+
+    @Override
+    public Long creationBonLivraison(Long factureId) {
+
+        Facture facture = factureRepository.findById(factureId).orElseThrow(() -> new EntityNotFoundException("NOT_FOUND"));
+
+        BondeLivraison bondeLivraison = new BondeLivraison();
+        bondeLivraison.setReference(generateReferenceDevis());
+        bondeLivraison.setTauxTVA(facture.getTauxTVA());
+        bondeLivraison.setDateBondeLivraison(facture.getDateFacture());
+        bondeLivraison.setTimbreFiscale(facture.getTimbreFiscale());
+        bondeLivraison.setClient(facture.getClient());
+        bondeLivraison.setMontantHt(facture.getMontantHt());
+        bondeLivraison.setMontantTTC(facture.getMontantTTC());
+        bondeLivraison = bondeLivraisonRepository.save(bondeLivraison);
+
+        BondeLivraison finalDevis = bondeLivraison;
+        facture.getLignesFacture().forEach(l -> {
+            LigneBondeLivraison ligneBondeLivraison = new LigneBondeLivraison();
+            ligneBondeLivraison.setProduit(l.getProduit());
+            ligneBondeLivraison.setRemise(l.getRemise());
+            ligneBondeLivraison.setQuantite(l.getQuantite());
+            ligneBondeLivraison.setPrixUnitaire(l.getPrixUnitaire());
+            ligneBondeLivraison.setPrixTotal(l.getPrixTotal());
+            ligneBondeLivraison.setBondeLivraison(finalDevis);
+            ligneBondeLivraisonRepository.save(ligneBondeLivraison);
+        });
+
+        return bondeLivraison.getId();
     }
 }

@@ -140,4 +140,14 @@ public class FactureController implements FactureApi {
     emailService.sendEmailFacture(Long.valueOf(13) );
     return ResponseEntity.ok().build();
   }
+
+  @Override
+  public ResponseEntity<Long> creationDevis(Long factureId) {
+    return ResponseEntity.ok().body(factureService.creationDevis(factureId));
+  }
+
+  @Override
+  public ResponseEntity<Long> creationBonLivraison(Long factureId) {
+    return ResponseEntity.ok().body(factureService.creationBonLivraison(factureId));
+  }
 }

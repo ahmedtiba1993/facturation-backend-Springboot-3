@@ -1,5 +1,6 @@
 package com.facturation.service.impl;
 
+import com.facturation.dto.DevisDto;
 import com.facturation.dto.FactureDto;
 import com.facturation.dto.UrlFileDto;
 import com.facturation.exception.EntityNotFoundException;
@@ -11,6 +12,8 @@ import com.facturation.repository.BondeLivraisonRepository;
 import com.facturation.repository.DevisRepository;
 import com.facturation.repository.FactureRepository;
 import com.facturation.repository.UrlFileRepository;
+import com.facturation.service.BondeLivraisonService;
+import com.facturation.service.DevisService;
 import com.facturation.service.FactureService;
 import com.facturation.service.UrlFileService;
 import com.itextpdf.text.DocumentException;
@@ -33,8 +36,10 @@ public class UrlFileServiceImpl implements UrlFileService {
     private final FactureRepository factureRepository;
     private final UrlFileRepository urlFileRepository;
     private final FactureService factureService;
+    private final DevisService devisService;
     private final DevisRepository devisRepository;
     private final BondeLivraisonRepository bondeLivraisonRepository;
+    private final BondeLivraisonService bondeLivraisonService;
 
     @Override
     public UrlFileDto createUrlFile(Long id, String type) {
@@ -57,16 +62,29 @@ public class UrlFileServiceImpl implements UrlFileService {
     }
 
     @Override
-    public FactureDto getFactureId(UUID uuid){
+    public UrlFileDto getUrlFile(UUID uuid){
         UrlFile urlFile = urlFileRepository.findByUuid(uuid).orElseThrow(() -> new EntityNotFoundException("NOT_FOUND"));
-        return FactureDto.fromEntity(urlFile.getFacture());
+        return UrlFileDto.toUrlFileDto(urlFile);
     }
 
     @Override
-    public ResponseEntity<InputStreamResource> generatePdf(Long id) throws DocumentException, IOException {
-        Facture facture = factureRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("NOT_FOUND"));
-        var pdf = factureService.generatePdf(List.of(facture.getId()));
-        return pdf;
+    public ResponseEntity<InputStreamResource> generatePdf(Long id, String type) throws DocumentException, IOException {
+
+        if(type.equals("facture")){
+            Facture facture = factureRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("NOT_FOUND"));
+            var pdf = factureService.generatePdf(List.of(facture.getId()));
+            return pdf;
+        }else if(type.equals("devis")){
+            Devis devis = devisRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("NOT_FOUND"));
+            var pdf = devisService.generatePdf(List.of(devis.getId()));
+            return pdf;
+        }else if(type.equals("bondeLivraison")){
+            BondeLivraison bondeLivraison = bondeLivraisonRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("NOT_FOUND"));
+            var pdf = bondeLivraisonService.generatePdf(List.of(bondeLivraison.getId()));
+            return pdf;
+        }
+
+       return null;
     }
 
 }

@@ -58,4 +58,10 @@ public interface FactureApi {
 
     @PostMapping(value = FACTURE_ENDPOINT + "/sendMailFacture/{factureId}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Void> sendMail(@PathVariable Long factureId) throws DocumentException, IOException, MessagingException;
+
+    @PostMapping(value = FACTURE_ENDPOINT+ "/creationDevis/{factureId}")
+    ResponseEntity<Long> creationDevis(@PathVariable Long factureId);
+
+    @PostMapping(value = FACTURE_ENDPOINT+ "/creationBonLivraison/{factureId}")
+    ResponseEntity<Long> creationBonLivraison(@PathVariable Long factureId);
 }
