@@ -53,6 +53,8 @@ public class DevisServiceImpl implements DevisService {
     private final TvaRepository tvaRepository;
     private final FactureRepository factureRepository;
     private final LigneFactureRepository ligneFactureRepository;
+    private final BondeLivraisonRepository bondeLivraisonRepository;
+    private final LigneBondeLivraisonRepository ligneBondeLivraisonRepository;
 
     @Override
     public DevisDto save(Devis devis) {
@@ -550,6 +552,7 @@ public class DevisServiceImpl implements DevisService {
 
     }
 
+
     @Override
     public ResponseEntity<Void> deleteLingeDevis(Long devisId, Long ligneDevisId) {
         DevisDto devisDto = findById(devisId);
@@ -609,5 +612,47 @@ public class DevisServiceImpl implements DevisService {
         String nombreDeFacturesFormatte = decimalFormat.format(numFacture + 1);
         numFactureRepository.updateNumFacture(numFacture + 1);
         return nombreDeFacturesFormatte + "-" + year;
+    }
+
+    @Override
+    public Long creationBonLivraison(Long devisId) {
+
+        Devis devis = devisRepository.findById(devisId).orElseThrow(() -> new EntityNotFoundException("NOT_FOUND"));
+
+        BondeLivraison bondeLivraison = new BondeLivraison();
+        bondeLivraison.setReference(generateReferenceBonDeLivraison());
+        bondeLivraison.setTauxTVA(devis.getTauxTVA());
+        bondeLivraison.setDateBondeLivraison(devis.getDateDevis());
+        bondeLivraison.setTimbreFiscale(devis.getTimbreFiscale());
+        bondeLivraison.setClient(devis.getClient());
+        bondeLivraison.setMontantHt(devis.getMontantHt());
+        bondeLivraison.setMontantTTC(devis.getMontantTTC());
+        bondeLivraison = bondeLivraisonRepository.save(bondeLivraison);
+
+        BondeLivraison finalDevis = bondeLivraison;
+        devis.getLigneDevis().forEach(l -> {
+            LigneBondeLivraison ligneBondeLivraison = new LigneBondeLivraison();
+            ligneBondeLivraison.setProduit(l.getProduit());
+            ligneBondeLivraison.setRemise(l.getRemise());
+            ligneBondeLivraison.setQuantite(l.getQuantite());
+            ligneBondeLivraison.setPrixUnitaire(l.getPrixUnitaire());
+            ligneBondeLivraison.setPrixTotal(l.getPrixTotal());
+            ligneBondeLivraison.setBondeLivraison(finalDevis);
+            ligneBondeLivraisonRepository.save(ligneBondeLivraison);
+        });
+
+        return bondeLivraison.getId();
+    }
+
+    public String generateReferenceBonDeLivraison() {
+
+        LocalDate today = LocalDate.now();
+        int year = today.getYear();
+
+        DecimalFormat decimalFormat = new DecimalFormat("000");
+        Integer numDevis = numFactureRepository.getNumDevis();
+        String nombreDeDevisFormatte = decimalFormat.format(numDevis + 1);
+        numFactureRepository.updateNumDevis(numDevis + 1);
+        return nombreDeDevisFormatte + "-" + year;
     }
 }

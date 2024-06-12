@@ -5,7 +5,9 @@ import lombok.Getter;
 @Getter
 public enum EmailTemplateName {
 
-    FACTURE_TEMPLATE("facture");
+    FACTURE_TEMPLATE("facture"),
+    DEVIS_TEMPLATE("devis");
+    ;
 
     private final String name;
 

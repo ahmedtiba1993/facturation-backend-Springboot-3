@@ -2,19 +2,17 @@ package com.facturation.service;
 
 import com.facturation.exception.EntityNotFoundException;
 import com.facturation.exception.InvalidEntityException;
+import com.facturation.model.Devis;
 import com.facturation.model.Facture;
+import com.facturation.repository.DevisRepository;
 import com.facturation.repository.FactureRepository;
 import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Image;
 import jakarta.activation.DataSource;
-import jakarta.activation.FileDataSource;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.util.ByteArrayDataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -22,10 +20,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,16 +36,19 @@ public class EmailService {
     private final SpringTemplateEngine templateEngine;
     private final FactureRepository factureRepository;
     private final FactureService factureService;
+    private final DevisRepository devisRepository;
+    private final DevisService devisService;
+
 
     @Async
     public void sendEmailFacture(Long factureId) throws MessagingException, IOException, DocumentException {
 
         Facture facture = factureRepository.findById(factureId).get();
-        if(facture == null){
+        if (facture == null) {
             throw new EntityNotFoundException("FACTURE_NOT_FOUND");
         }
 
-        if(facture.getClient().getEmail() == null){
+        if (facture.getClient().getEmail() == null) {
             throw new InvalidEntityException("EMAIL_EMPTY");
         }
 
@@ -62,14 +60,14 @@ public class EmailService {
             Map<String, Object> properties = new HashMap<>();
             properties.put("username", facture.getClient().getNomCommercial());
             properties.put("dateFacture", facture.getDateFacture());
-            properties.put("montantTTC", facture.getMontantTTC()+" TND");
+            properties.put("montantTTC", facture.getMontantTTC() + " TND");
             properties.put("refFacture", facture.getReference());
 
             Context context = new Context();
             context.setVariables(properties);
 
             helper.setTo(facture.getClient().getEmail());
-            helper.setSubject("Facture "+facture.getReference());
+            helper.setSubject("Facture " + facture.getReference());
 
             String template = templateEngine.process(templateName, context);
 
@@ -78,13 +76,54 @@ public class EmailService {
             var pdfFile = factureService.generatePdf(List.of(factureId)).getBody();
             if (pdfFile != null) {
                 DataSource dataSource = new ByteArrayDataSource(pdfFile.getInputStream(), "application/pdf");
-                helper.addAttachment("Facture "+facture.getReference(), dataSource);
+                helper.addAttachment("Facture " + facture.getReference(), dataSource);
+            }
+
+            mailSender.send(mimeMessage);
+        }
+    }
+
+    @Async
+    public void sendEmailDevis(Long devisId) throws MessagingException, IOException, DocumentException {
+
+        Devis devis = devisRepository.findById(devisId).get();
+        if (devis == null) {
+            throw new EntityNotFoundException("DEVIS_NOT_FOUND");
+        }
+
+        if (devis.getClient().getEmail() == null) {
+            throw new InvalidEntityException("EMAIL_EMPTY");
+        }
+
+        if (devis != null) {
+            String templateName = EmailTemplateName.DEVIS_TEMPLATE.getName();
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MULTIPART_MODE_MIXED, UTF_8.name());
+
+            Map<String, Object> properties = new HashMap<>();
+            properties.put("username", devis.getClient().getNomCommercial());
+            properties.put("dateDevis", devis.getDateDevis());
+            properties.put("montantTTC", devis.getMontantTTC() + " TND");
+            properties.put("refDevis", devis.getReference());
+
+            Context context = new Context();
+            context.setVariables(properties);
+
+            helper.setTo(devis.getClient().getEmail());
+            helper.setSubject("Devis " + devis.getReference());
+
+            String template = templateEngine.process(templateName, context);
+
+            helper.setText(template, true);
+
+            var pdfFile = devisService.generatePdf(List.of(devis.getId())).getBody();
+            if (pdfFile != null) {
+                DataSource dataSource = new ByteArrayDataSource(pdfFile.getInputStream(), "application/pdf");
+                helper.addAttachment("Devis " + devis.getReference(), dataSource);
             }
 
             mailSender.send(mimeMessage);
         }
 
     }
-
-
 }

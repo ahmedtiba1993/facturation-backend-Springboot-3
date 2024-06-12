@@ -137,7 +137,7 @@ public class FactureController implements FactureApi {
 
   @Override
   public ResponseEntity<Void> sendMail(Long factureId) throws DocumentException, IOException, MessagingException {
-    emailService.sendEmailFacture(Long.valueOf(13) );
+    emailService.sendEmailFacture(Long.valueOf(factureId) );
     return ResponseEntity.ok().build();
   }
 

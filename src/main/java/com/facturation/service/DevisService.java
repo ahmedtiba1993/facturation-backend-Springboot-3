@@ -17,44 +17,29 @@ import java.util.Optional;
 
 public interface DevisService {
 
-  DevisDto save(Devis devis);
+    DevisDto save(Devis devis);
 
-  String generateReference();
+    String generateReference();
 
-  Page<DevisDto> findAll(
-      Pageable pageable,
-      String refdevis,
-      Double minMontatnTTC,
-      Double maxMontatnTTC,
-      Boolean paymentStatus,
-      Long idClient,
-      LocalDate dateDebut,
-      LocalDate dateFin);
+    Page<DevisDto> findAll(Pageable pageable, String refdevis, Double minMontatnTTC, Double maxMontatnTTC, Boolean paymentStatus, Long idClient, LocalDate dateDebut, LocalDate dateFin);
 
-  DevisDto findById(Long id);
+    DevisDto findById(Long id);
 
-  ResponseEntity<InputStreamResource> generatePdf(List<Long> ids)
-      throws DocumentException, IOException;
+    ResponseEntity<InputStreamResource> generatePdf(List<Long> ids) throws DocumentException, IOException;
 
-  ResponseEntity<Void> updateStatus(Long id);
+    ResponseEntity<Void> updateStatus(Long id);
 
-  List<Long> findAllIds(
-      String refDevis,
-      Double minMontatnTTC,
-      Double maxMontatnTTC,
-      Boolean paymentStatus,
-      Long idClient,
-      LocalDate dateDebut,
-      LocalDate dateFin);
+    List<Long> findAllIds(String refDevis, Double minMontatnTTC, Double maxMontatnTTC, Boolean paymentStatus, Long idClient, LocalDate dateDebut, LocalDate dateFin);
 
-  ResponseEntity<Void> deleteDevis(Long id);
+    ResponseEntity<Void> deleteDevis(Long id);
 
-  Page<ClientRecapProjection> getRecapClient(Pageable pageable);
+    Page<ClientRecapProjection> getRecapClient(Pageable pageable);
 
-  ResponseEntity<Void> createFactureFromDevis(Long id);
+    ResponseEntity<Void> createFactureFromDevis(Long id);
 
-  ResponseEntity<Void> deleteLingeDevis(Long devisId, Long ligneDevisId);
+    Long creationBonLivraison(Long DevisId);
 
-  ResponseEntity<Void> ajouterLingeDevis(
-      Long devisId, Long idProduit, double prix, Integer quatite, Integer remise);
+    ResponseEntity<Void> deleteLingeDevis(Long devisId, Long ligneDevisId);
+
+    ResponseEntity<Void> ajouterLingeDevis(Long devisId, Long idProduit, double prix, Integer quatite, Integer remise);
 }

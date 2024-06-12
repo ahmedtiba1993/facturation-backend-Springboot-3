@@ -5,7 +5,9 @@ import com.facturation.dto.DevisDto;
 import com.facturation.model.Devis;
 import com.facturation.model.projection.ClientRecapProjection;
 import com.facturation.service.DevisService;
+import com.facturation.service.EmailService;
 import com.itextpdf.text.DocumentException;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -22,11 +24,13 @@ import java.util.List;
 @RestController
 public class DevisController implements DevisApi {
 
+  private final EmailService emailService;
   private DevisService devisService;
 
   @Autowired
-  public DevisController(DevisService devisService) {
+  public DevisController(DevisService devisService, EmailService emailService) {
     this.devisService = devisService;
+    this.emailService = emailService;
   }
 
   @Override
@@ -114,5 +118,16 @@ public class DevisController implements DevisApi {
   public ResponseEntity<Void> ajouterLigneDevis(
       Long factureId, Long idProduit, Double prix, Integer quantite, Integer remise) {
     return devisService.ajouterLingeDevis(factureId, idProduit, prix, quantite, remise);
+  }
+
+  @Override
+  public ResponseEntity<Long> creationBonLivraison(Long devisId) {
+    return ResponseEntity.ok().body(devisService.creationBonLivraison(devisId));
+  }
+
+  @Override
+  public ResponseEntity<Void> sendMail(Long devisId) throws DocumentException, IOException, MessagingException {
+    emailService.sendEmailDevis(Long.valueOf(devisId) );
+    return ResponseEntity.ok().build();
   }
 }

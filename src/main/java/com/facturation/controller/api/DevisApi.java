@@ -6,6 +6,7 @@ import com.facturation.model.Devis;
 import com.facturation.model.projection.ClientRecapProjection;
 import com.facturation.model.projection.RecapClient;
 import com.itextpdf.text.DocumentException;
+import jakarta.mail.MessagingException;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
@@ -90,4 +91,11 @@ public interface DevisApi {
       @PathVariable("prix") Double prix,
       @PathVariable("quantite") Integer quantite,
       @PathVariable("remise") Integer remise);
+
+  @PostMapping(value = DEVIS_ENDPOINT+ "/creationBonLivraison/{devisId}")
+  ResponseEntity<Long> creationBonLivraison(@PathVariable Long devisId);
+
+  @PostMapping(value = DEVIS_ENDPOINT + "/sendMail/{devisId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity<Void> sendMail(@PathVariable Long devisId) throws DocumentException, IOException, MessagingException;
+
 }

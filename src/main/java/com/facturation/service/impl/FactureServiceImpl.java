@@ -583,7 +583,7 @@ public class FactureServiceImpl implements FactureService {
         Facture facture = factureRepository.findById(factureId).orElseThrow(() -> new EntityNotFoundException("NOT_FOUND"));
 
         BondeLivraison bondeLivraison = new BondeLivraison();
-        bondeLivraison.setReference(generateReferenceDevis());
+        bondeLivraison.setReference(generateReferenceBonDeLivraison());
         bondeLivraison.setTauxTVA(facture.getTauxTVA());
         bondeLivraison.setDateBondeLivraison(facture.getDateFacture());
         bondeLivraison.setTimbreFiscale(facture.getTimbreFiscale());
@@ -605,5 +605,17 @@ public class FactureServiceImpl implements FactureService {
         });
 
         return bondeLivraison.getId();
+    }
+
+    public String generateReferenceBonDeLivraison() {
+
+        LocalDate today = LocalDate.now();
+        int year = today.getYear();
+
+        DecimalFormat decimalFormat = new DecimalFormat("000");
+        Integer numDevis = numFactureRepository.getNumDevis();
+        String nombreDeDevisFormatte = decimalFormat.format(numDevis + 1);
+        numFactureRepository.updateNumDevis(numDevis + 1);
+        return nombreDeDevisFormatte + "-" + year;
     }
 }
